@@ -64,7 +64,6 @@ class _HomePageWidgetState extends State<MyHomePage> {
               Expanded(
                 child: ListView.builder(
                   padding: EdgeInsets.all(8),
-
                   scrollDirection: Axis.vertical,
                     itemBuilder: (_, index) {
                       var unit = "test";
@@ -79,8 +78,6 @@ class _HomePageWidgetState extends State<MyHomePage> {
                           }, // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));
                           child: const Text('Enter Unit'),
                         ),
-                        //leading: movie.image != null ? Image.network(movie.image) : null,
-
 
                       );
                     },

@@ -1,3 +1,5 @@
+import 'package:assignment_four/StudentDetailView.dart';
+import 'package:assignment_four/WeekReportView.dart';
 import 'package:flutter/material.dart';
 
 class ClassView extends StatefulWidget {
@@ -11,6 +13,11 @@ class _ClassViewState extends State<ClassView> {
   late TextEditingController searchFieldController;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  //Variables
+  String dropDownValue = "UG";
+
+
+
   @override
   void initState() {
     super.initState();
@@ -22,6 +29,11 @@ class _ClassViewState extends State<ClassView> {
     //Style definitions
     final ButtonStyle style =
     ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));//https://api.flutter.dev/flutter/material/ElevatedButton-class.html
+
+//TODO https://rsainik80.medium.com/dropdown-button-inside-listview-builder-in-flutter-e2eb74fb45b4
+    //TODO READ THIS
+    //! DO IT
+
 
     return Scaffold(
       appBar: AppBar(
@@ -128,11 +140,36 @@ class _ClassViewState extends State<ClassView> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        children: [],
+                      child: Container(
+                        height: 350,
+                        child: ListView.builder(
+                            padding: EdgeInsets.all(8),
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (_, index) {
+                              return ListTile(
+                                title:Text("Student Name TODO"),
+                                subtitle: Text("Student ID TODO"),
+                                trailing:  new DropdownButton<String>(
+                                  value: dropDownValue,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      dropDownValue = newValue!;
+                                      print("Value changed to $dropDownValue");
+                                    });
+                                  }, //Gets the changed value
+
+                                  items: <String>['A', 'B', 'C', 'D', 'F', 'UG'].map((String value) {
+                                    return new DropdownMenuItem<String>(
+                                      child: new Text(value),
+                                      value: value,
+                                    );
+                                  }).toList(), //Creates the text for each element in list
+
+                                  ),
+                                );
+                            },
+                            itemCount:3
+                        ),
                       ),
                     )
                   ],
@@ -188,7 +225,7 @@ class _ClassViewState extends State<ClassView> {
                     ),//REMOVE STUDENT
                     ElevatedButton(
                       onPressed: () {
-                        print('View Report pressed ...'); //TODO
+                        Navigator.push(context, MaterialPageRoute(builder: (context) { return WeekReportView(); }));//print('View Report pressed ...'); //TODO
                       },
                       child: const Text("View Report"),
                       style: ElevatedButton.styleFrom(

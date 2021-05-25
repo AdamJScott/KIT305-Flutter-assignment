@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "626236808700",
+    "project_id": "au-edu-utas-ajscott1-android",
+    "storage_bucket": "au-edu-utas-ajscott1-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626236808700:android:0aed5fcc9abdf367d1a679",
+        "android_client_info": {
+          "package_name": "au.edu.utas.ajscott1.androidassignment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "626236808700-pnf3urtevrl1eh1bim54n4f8mo74bimv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGTPWwO5s9bl1wrEc9tYTpQpxLZqomW5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "626236808700-pnf3urtevrl1eh1bim54n4f8mo74bimv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "626236808700-80vdkfvqbol7srdmn9o2q650basl2o6p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "au.utas.edu.ajscott1.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626236808700:android:7e8c69fb67909eb8d1a679",
+        "android_client_info": {
+          "package_name": "au.edu.utas.ajscott1.assignment_four"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "626236808700-pnf3urtevrl1eh1bim54n4f8mo74bimv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGTPWwO5s9bl1wrEc9tYTpQpxLZqomW5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "626236808700-pnf3urtevrl1eh1bim54n4f8mo74bimv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "626236808700-80vdkfvqbol7srdmn9o2q650basl2o6p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "au.utas.edu.ajscott1.ios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

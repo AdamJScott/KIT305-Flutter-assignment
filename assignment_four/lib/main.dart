@@ -4,6 +4,42 @@ import 'package:provider/provider.dart';
 
 import 'ClassView.dart';
 
+
+/*
+  TODO
+    1. Create UNIT model to generate each list item and button
+    2. Create link from unit button to class view, passing the relevant data in
+    3. Create WEEK model to generate student list items
+      3.a. then add marking single scheme (numeric)
+      3.b. add swapping between weeks
+      3.c. then generation of each scheme
+    4. Create movement from student name to student detail page
+      4.a. Get name, student ID, then get photo
+    5. Back in class view
+      5.a. Add student
+      5.b. Delete student
+      5.c. Grade student
+      5.d. Change scheme functionality
+      5.e. Test that works
+      5.f. Generate summary for unit
+    6. Student detail view
+      6.a. Take new photo
+      6.b. Remove photo
+      6.c. Choose photo
+      6.d. Change name and save
+      6.e. Generate student unit information summary
+    7. Week report view
+      7.a. Generate grade average
+      7.b. Generate attendance percentage
+      7.c. Populate the report summary view from the week it entered from
+    8. Bug fixes, report
+
+
+
+
+ */
+
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());

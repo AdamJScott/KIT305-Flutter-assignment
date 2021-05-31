@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 
 class StudentDetailView extends StatefulWidget {
   //const StudentDetailView({Key key}) : super(key: key);
+  StudentDetailView({Key? key, required this.studentName, required this.studentID}) : super(key: key);
+
+  String studentName;
+  final String studentID;
+
 
   @override
-  _StudentDetailViewState createState() => _StudentDetailViewState();
+  _StudentDetailViewState createState() => _StudentDetailViewState(studentName: studentName, studentID: studentID);
 }
 
 class _StudentDetailViewState extends State<StudentDetailView> {
@@ -12,12 +17,17 @@ class _StudentDetailViewState extends State<StudentDetailView> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   double fontSizeVar = 25;
 
+  String studentName;
+  final String studentID;
+
+  _StudentDetailViewState({Key? key, required this.studentName, required this.studentID});
+
   @override
   void initState() {
     super.initState();
     studentFieldController = TextEditingController();
 
-    studentFieldController.text = "STUDENT NAME HERE TODO";//TODO
+    studentFieldController.text = studentName;//TODO
   }
 
   @override
@@ -166,7 +176,7 @@ class _StudentDetailViewState extends State<StudentDetailView> {
                       fontSize: fontSizeVar,
                     ),
                   ),
-                  Text("XXXXXX TODO",
+                  Text(studentID,
                     style: TextStyle(
                       fontSize: fontSizeVar,
                     ),),//TODO Change to variable

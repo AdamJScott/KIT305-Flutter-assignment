@@ -1,3 +1,4 @@
+import 'package:assignment_four/unit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,20 +8,20 @@ import 'ClassView.dart';
 
 /*
   TODO
-    1. Create UNIT model to generate each list item and button
-    2. Create link from unit button to class view, passing the relevant data in
+    1. Create UNIT model to generate each list item and button ✔️
+    2. Create link from unit button to class view, passing the relevant data in ✔️
     3. Create WEEK model to generate student list items
       3.a. then add marking single scheme (numeric)
       3.b. add swapping between weeks
-      3.c. then generation of each scheme
+      3.c. then generation of each scheme *NTH*
     4. Create movement from student name to student detail page
       4.a. Get name, student ID, then get photo
     5. Back in class view
       5.a. Add student
       5.b. Delete student
       5.c. Grade student
-      5.d. Change scheme functionality
-      5.e. Test that works
+      5.d. Change scheme functionality *NTH*
+      5.e. Test that works *NTH*
       5.f. Generate summary for unit
     6. Student detail view
       6.a. Take new photo
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done)
           {
             return ChangeNotifierProvider(
-                create: (context) => null,
+                create: (context) => UnitModel(),
                 child: MaterialApp(
                   title: 'Tutor Marks',
                   theme: ThemeData(
@@ -109,55 +110,68 @@ class MyHomePage extends StatefulWidget {
 
 class _HomePageWidgetState extends State<MyHomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final units = new UnitModel();
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style =
-    ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));//https://api.flutter.dev/flutter/material/ElevatedButton-class.html
 
+        return Consumer<UnitModel>(
+            builder:buildScaffold
+        );
+  }
+
+  Scaffold buildScaffold(BuildContext context, UnitModel unitModel, _) {
+    final ButtonStyle style =
+    ElevatedButton.styleFrom(textStyle: const TextStyle(
+        fontSize: 20)); //https://api.flutter.dev/flutter/material/ElevatedButton-class.html
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      key: scaffoldKey,
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment(0, 0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Text(
-                'Please select a unit to enter', style: TextStyle(fontSize: 20),
-              ),
-              Expanded(
-                child: ListView.builder(
+    appBar: AppBar(
+      // Here we take the value from the MyHomePage object that was created by
+      // the App.build method, and use it to set our appbar title.
+      title: Text(widget.title),
+    ),
+    key: scaffoldKey,
+    body: SafeArea(
+      child: Align(
+        alignment: Alignment(0, 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Text(
+              'Please select a unit to enter', style: TextStyle(fontSize: 20),
+            ),
+            Expanded(
+              child: ListView.builder(
                   padding: EdgeInsets.all(8),
                   scrollDirection: Axis.vertical,
-                    itemBuilder: (_, index) {
-                      var unit = "test";
-                      return ListTile(
-                        title:Text("Unit name here"),
+                  itemBuilder: (context, index) {
+                    var unit = unitModel.units[index];
+                    return ListTile(
+                      title: Text(unit.unitname),
+                      subtitle: Text(
+                          "Number of weeks: ${unit.numberOfWeeks}"),
+                      trailing: ElevatedButton(
+                        style: style,
+                        onPressed: () {
 
-                        subtitle: Text("Number of weeks: N"),
-                        trailing: ElevatedButton(
-                          style: style,
-                          onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) { return ClassView(); }));
-                          }, // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));
-                          child: const Text('Enter Unit'),
-                        ),
+                          Navigator.push(
+                              context, MaterialPageRoute(builder: (context) {
+                            return ClassView(unitname: unit.unitname);
+                          }));
+                        },
+                        // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));
+                        child: const Text('Enter Unit'),
+                      ),
 
-                      );
-                    },
-                    itemCount:1
-                ),
-              )
-            ],
-          ),
+                    );
+                  },
+                  itemCount: unitModel.units.length
+              ),
+            )
+          ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 class ClassView extends StatefulWidget {
   //const ClassView({Key key}) : super(key: key);
 
+  final String unitname;
+
+  const ClassView({Key? key, required this.unitname}) : super(key: key);
+
+
   @override
   _ClassViewState createState() => _ClassViewState();
 }
@@ -15,8 +20,6 @@ class _ClassViewState extends State<ClassView> {
 
   //Variables
   String dropDownValue = "UG";
-
-
 
   @override
   void initState() {
@@ -42,7 +45,7 @@ class _ClassViewState extends State<ClassView> {
           onPressed: () => Navigator.of(context).pop(),
 
         ),
-        title: Text("TODO UNITCODE"),//TODO UNIT CODE
+        title: Text(widget.unitname),//TODO UNIT CODE
         centerTitle: true,
       ),
 

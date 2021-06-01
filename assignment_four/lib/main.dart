@@ -2,6 +2,10 @@ import 'package:assignment_four/unit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
+import 'dart:async';
+import 'dart:io';
+
 
 import 'ClassView.dart';
 
@@ -11,14 +15,14 @@ import 'ClassView.dart';
     1. Create UNIT model to generate each list item and button ✔️
     2. Create link from unit button to class view, passing the relevant data in ✔️
     3. Create WEEK model to generate student list items ✔
-      3.a. then add marking single scheme (numeric)
-      3.b. add swapping between weeks
+      3.a. then add marking single scheme (HD / A) ✔
+      3.b. add swapping between weeks ✔
       3.c. then generation of each scheme *NTH*
     4. Create movement from student name to student detail page
-      4.a. Get name ✔, student ID ✔, then get photo
+      4.a. Get name ✔, student ID ✔, then get photo *NTH*
     5. Back in class view
-      5.a. Add student
-      5.b. Delete student
+      5.a. Add student ✔
+      5.b. Delete student ✔
       5.c. Grade student
       5.d. Change scheme functionality *NTH*
       5.e. Test that works *NTH*
@@ -155,7 +159,7 @@ class _HomePageWidgetState extends State<MyHomePage> {
                         onPressed: () {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) {
-                            return ClassView(unitname: unit.unitname, unitID: unit.id);
+                            return ClassView(unitname: unit.unitname, unitID: unit.id, numberOfWeeks: unit.numberOfWeeks);
                           }));
                         },
                         // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));

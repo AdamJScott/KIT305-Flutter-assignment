@@ -1,19 +1,99 @@
+import 'package:assignment_four/student.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
+import 'dart:async';
+import 'dart:io';
 
-class StudentDetailView extends StatefulWidget {
+
+
+
+class StudentDetailView extends StatelessWidget {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  final String unitname;//unitReference
+
+  String studentName;//filePath
+  final String studentID;//studentReference
+
+  StudentDetailView({Key? key, required this.studentName, required this.studentID, required this.unitname}) : super (key:key);
+
+  @override
+  Widget build (BuildContext context){
+    return FutureBuilder(
+      future: _initialization,
+      builder: (context, snapshot){
+        if (snapshot.hasError){
+          //something wrong
+        }
+        if (snapshot.connectionState == ConnectionState.done){
+          return ChangeNotifierProvider(
+              create: (context) => singleStudent(),
+              child: StudentDetailViewSt(studentName: studentName, studentID: studentID, unitName: unitname),
+          );
+        }
+        return MaterialApp(
+            home:  Scaffold(
+                body: SafeArea(
+                    child: Align(
+                        alignment: Alignment(0.5, 0.5),
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Text(
+                                'Loading Application', style: TextStyle(fontSize: 40),
+                              ),
+                            ]
+                        )
+                    )
+                )
+            )
+        );
+
+      }
+    );
+  }
+
+}
+
+class StudentDetailViewSt extends StatefulWidget {
   //const StudentDetailView({Key key}) : super(key: key);
-  StudentDetailView({Key? key, required this.studentName, required this.studentID}) : super(key: key);
+  StudentDetailViewSt({Key? key, required this.studentName, required this.studentID, required this.unitName}) : super(key: key);
 
   String studentName;
   final String studentID;
+  final String unitName;
 
 
   @override
   _StudentDetailViewState createState() => _StudentDetailViewState(studentName: studentName, studentID: studentID);
 }
 
-class _StudentDetailViewState extends State<StudentDetailView> {
+
+Future<String> returnDownloadURL(String studentName, String studentID, String unitName) async {
+
+  var reference = FirebaseStorage.instance.ref().child(studentName);
+  String downloadURL = await reference.getDownloadURL();
+  downloadURL = Uri.decodeFull(downloadURL);
+  downloadURL = downloadURL.split(" ").join("%20");
+  print("Download URL is ${downloadURL}");
+  return downloadURL;
+}
+
+
+void takePhoto() async {
+
+
+
+}
+
+class _StudentDetailViewState extends State<StudentDetailViewSt>{
   late TextEditingController studentFieldController;
+  late String downloadURL;
+
+
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   double fontSizeVar = 25;
 
@@ -25,6 +105,9 @@ class _StudentDetailViewState extends State<StudentDetailView> {
   @override
   void initState() {
     super.initState();
+    var reference = FirebaseStorage.instance.ref().child(studentName);
+    downloadURL = returnDownloadURL(studentName, studentID, widget.unitName).toString();
+
     studentFieldController = TextEditingController();
 
     studentFieldController.text = studentName;//TODO
@@ -46,7 +129,7 @@ class _StudentDetailViewState extends State<StudentDetailView> {
         ),
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Student Name TODO"),//TODO change to variable
+        title: Text(studentName),//TODO change to variable
         centerTitle: true,
       ),
       key: scaffoldKey,
@@ -68,10 +151,8 @@ class _StudentDetailViewState extends State<StudentDetailView> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const Image(
-                      image: NetworkImage(
-                        'https://media.tenor.com/images/f51e8568774ddd46d40c3686069e12b3/tenor.gif',
-                      ),//TODO CHANGE TO DATABASE
+                    Image(
+                      image: NetworkImage("https://i.pinimg.com/474x/61/c7/80/61c780b045f999daacfd85e6f5ee96c8.jpg"),
                       width: 150,
                       height: 150,
                     ),
@@ -79,8 +160,9 @@ class _StudentDetailViewState extends State<StudentDetailView> {
                     Column(
                       children: [
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             print('Take photo pressed ...'); //TODO
+
                           },
                           child: const Text("Take photo"),
                           style: ElevatedButton.styleFrom(

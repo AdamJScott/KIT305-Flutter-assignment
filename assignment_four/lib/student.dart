@@ -11,6 +11,16 @@ class Student {
   bool attended = false;//Not used anymore
 
   Student({required this.studentName, required this.studentID, required this.grade});
+
+
+  Map<String, dynamic> toJson() =>
+      {
+        'attended': attended,
+        'grade': grade,
+        'studentID' : studentID,
+        'studentName': studentName,
+        'doc_id': doc_id
+      };
 }
 
 
@@ -21,6 +31,9 @@ class StudentModel extends ChangeNotifier{
 
 
   bool loading = false;
+  String markingScheme = "";
+
+
 
   StudentModel(int weekNumber, String unitID){
     fetchWeek(weekNumber, unitID);
@@ -36,6 +49,7 @@ class StudentModel extends ChangeNotifier{
       if (doc.get("weekNumber") == weekNumber){
         //print("Document found $doc with ID of ${doc.id} with week number of ${doc.get("weekNumber")}");
         //fetchStudentList(doc.id);
+        markingScheme = doc.get("gradeScheme");
 
         var studentSnap = await unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students").orderBy("studentName").get();
         studentSnap.docs.forEach((stuFound) {
@@ -51,8 +65,51 @@ class StudentModel extends ChangeNotifier{
         notifyListeners();
       }
     });
-
-
   }
 
+  void addStudent(String unitID, int weeknumber, int maxWeeks, Student newStudent) async{
+
+    loading = true;
+    for (int i = weeknumber; i <= maxWeeks; i++){
+      var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
+      querySnap.docs.forEach((doc) async {
+        var studentCollection = unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students");
+        await studentCollection.add(newStudent.toJson());
+      });
+
+      if (i == weeknumber){
+        fetchWeek(weeknumber, unitID);
+      }
+    }
+  }
+
+  void deleteStudent(String unitID, int weekNumber, int maxWeeks, Student deletedStudent) async{
+
+    loading = true;
+
+    for (int i = weekNumber; i <= maxWeeks; i++){
+      //Get the week document
+      var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
+      querySnap.docs.forEach((weekDoc) async {
+          //Get each week's student information
+        var studentSnap = await unitCollection.doc(unitID).collection("weeks").doc(weekDoc.id).collection("students").where("studentID", isEqualTo: deletedStudent.studentID).get();
+        studentSnap.docs.forEach((studentToDelete) async{
+          await unitCollection.doc(unitID).collection("weeks").doc(weekDoc.id).collection("students").doc(studentToDelete.id).delete();
+        });
+      });
+
+      if (i == weekNumber){
+        fetchWeek(weekNumber, unitID);
+      }
+    }
+  }
+
+
 }
+
+class singleStudent extends ChangeNotifier{
+
+
+
+}
+

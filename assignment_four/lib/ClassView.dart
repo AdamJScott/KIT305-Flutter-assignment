@@ -194,17 +194,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
-                      style: style,
-                      onPressed: () {
-                        weekNumber = decrementWeek(weekNumber, widget.numberOfWeeks);
-                        setState(() {
-                          weekNoText = "Week ${weekNumber}";
-                          students.fetchWeek(weekNumber, unitID);
-                        });
-                      },
-                      child: const Text("Last"),
-                    ),
+                    LastElevatedButton(style, students),
                     Align(
                       child: Text(
                         weekNoText, //TODO CHANGE TO VARIABLE
@@ -213,20 +203,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                         ),
                       ),
                     ),
-                    ElevatedButton(
-                      style: style,
-                      onPressed: () {
-                        weekNumber = incrementWeek(weekNumber, widget.numberOfWeeks);
-                        print("Called incrememebt week in button press $weekNumber");
-
-                        setState(() {
-                          weekNoText = "Week ${weekNumber}";
-                          students.fetchWeek(weekNumber, unitID);
-                        });
-
-                      },
-                      child: const Text("Next"),
-                    ),
+                    NextElevatedButton(style, students),
                   ],
                 ),
               ),
@@ -241,7 +218,40 @@ class _ClassViewSt extends State<ClassViewSt> {
               ), // row for marking scheme label
               Row(
                 mainAxisSize: MainAxisSize.max,
-                children: [], //TODO IMPLEMENT BUTTON BAR THING
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ButtonBar(
+                    children: <Widget>[
+                      TextButton(
+                        child: Text("Name asc."),
+                        onPressed: () {
+                          print("pressed asc");
+                          students.sortByAscending();
+                        },
+                      ),
+                      TextButton(
+                        child: Text("Name desc."),
+                        onPressed: () {
+                          print("pressed desc");
+                          students.sortByDescending();
+                        },
+                      ),
+                      TextButton(
+                        child: Text("Graded"),
+                        onPressed: () {
+                          students.sortByGraded();
+
+                        },
+                      ),
+                      TextButton(
+                        child: Text("Ungraded"),
+                        onPressed: () {
+                          students.sortByUnGraded();
+                        },
+                      ),
+                    ]
+                  )
+                ],
               ), //ROW for sort bar
               Row(
                 mainAxisSize: MainAxisSize.max,
@@ -317,142 +327,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      print('RemoveStudent pressed ...'); //TODO
-                      final IDController = TextEditingController();
-
-                      //build another alert
-                      showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (BuildContext context){
-                            return AlertDialog(
-                              scrollable: false,
-                              content: Padding(
-                                padding: const EdgeInsets.all(16.0),
-
-                                child: Form(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextFormField(
-                                          controller: IDController,
-                                          decoration: InputDecoration(
-                                            labelText: 'Input Student ID to delete:',
-                                          ),
-                                        )
-                                      ],
-                                    )
-                                ),
-                              ),
-                              actions: [
-                                ElevatedButton(
-                                  child: Text("Cancel"),
-                                  onPressed: (){
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.red,
-                                      onPrimary: Colors.white,
-                                      textStyle: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    child: Text("Delete student"),
-                                  onPressed: (){
-                                      //Create new dialog that gets the student ID, if not, return something else
-                                    Student idExists = students.listOfStudents.firstWhere((studentIDNumber) => studentIDNumber.studentID == IDController.text, orElse: () => new Student(studentName: "", studentID: "", grade: ""));
-
-                                    if (idExists.studentID == IDController.text){
-                                      //ID exists
-                                      print("student exists");
-                                      showDialog(context: context,
-                                          barrierDismissible: true,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                                content: Padding(
-                                                    padding: const EdgeInsets.all(
-                                                        16.0),
-                                                    child: Column(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                            "Are you sure you want to delete ${idExists.studentName} with the ID of: ${IDController.text} from the class?\nThis cannot be reversed."),
-                                                      ],
-                                                    )
-                                                ),
-                                              actions: [
-                                                ElevatedButton(
-                                                  child: Text("Cancel"),
-                                                  onPressed: (){
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                                ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                    primary: Colors.red,
-                                                    onPrimary: Colors.white,
-                                                    textStyle: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                    ),
-                                                  child: Text("Delete student"),
-                                                  onPressed: (){
-                                                    students.deleteStudent(unitID, weekNumber, widget.numberOfWeeks, idExists);
-                                                    Navigator.pop(context);
-                                                    Navigator.pop(context);
-                                                  }
-                                                ),
-                                              ],
-                                            );
-                                          });
-
-                                    }
-                                    else{
-                                      print("student does not exists");
-                                      //ID does not exist
-                                      showDialog(context: context,
-                                          barrierDismissible: true,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                                content: Padding(
-                                                    padding: const EdgeInsets.all(
-                                                        16.0),
-                                                    child: Column(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                            "Student with ID of: ${IDController.text} does not exist."),
-                                                      ],
-                                                    )
-                                                )
-                                            );
-                                          });
-                                    }
-
-                                  },
-                                ),
-                              ],
-                            );
-
-                          }
-                      );
-
-                      //students.deleteStudent(unitID, weekNumber, widget.numberOfWeeks, Student(studentName: "doesnMater", studentID: "5", grade: "UG"));
-
-                    },
-                    child: const Text("Remove a student"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onPrimary: Colors.white,
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),//REMOVE STUDENT
+                  DeleteStudentButton(context, students),//REMOVE STUDENT
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) { return WeekReportView(); }));//print('View Report pressed ...'); //TODO
@@ -495,6 +370,175 @@ class _ClassViewSt extends State<ClassViewSt> {
       ),
     ),
   );
+  }
+
+  ElevatedButton NextElevatedButton(ButtonStyle style, StudentModel students) {
+    return ElevatedButton(
+                    style: style,
+                    onPressed: () {
+                      weekNumber = incrementWeek(weekNumber, widget.numberOfWeeks);
+
+                      setState(() {
+                        weekNoText = "Week ${weekNumber}";
+                        students.fetchWeek(weekNumber, unitID);
+                      });
+
+                    },
+                    child: const Text("Next"),
+                  );
+  }
+
+  ElevatedButton LastElevatedButton(ButtonStyle style, StudentModel students) {
+    return ElevatedButton(
+                    style: style,
+                    onPressed: () {
+                      weekNumber = decrementWeek(weekNumber, widget.numberOfWeeks);
+                      setState(() {
+                        weekNoText = "Week ${weekNumber}";
+                        students.fetchWeek(weekNumber, unitID);
+                      });
+                    },
+                    child: const Text("Last"),
+                  );
+  }
+
+  ElevatedButton DeleteStudentButton(BuildContext context, StudentModel students) {
+    return ElevatedButton(
+                  onPressed: () {
+                    print('RemoveStudent pressed ...'); //TODO
+                    final IDController = TextEditingController();
+
+                    //build another alert
+                    showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context){
+                          return AlertDialog(
+                            scrollable: false,
+                            content: Padding(
+                              padding: const EdgeInsets.all(16.0),
+
+                              child: Form(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextFormField(
+                                        controller: IDController,
+                                        decoration: InputDecoration(
+                                          labelText: 'Input Student ID to delete:',
+                                        ),
+                                      )
+                                    ],
+                                  )
+                              ),
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                child: Text("Cancel"),
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.red,
+                                    onPrimary: Colors.white,
+                                    textStyle: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  child: Text("Delete student"),
+                                onPressed: (){
+                                    //Create new dialog that gets the student ID, if not, return something else
+                                  Student idExists = students.listOfStudents.firstWhere((studentIDNumber) => studentIDNumber.studentID == IDController.text, orElse: () => new Student(studentName: "", studentID: "", grade: ""));
+
+                                  if (idExists.studentID == IDController.text){
+                                    //ID exists
+                                    print("student exists");
+                                    showDialog(context: context,
+                                        barrierDismissible: true,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                              content: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                          "Are you sure you want to delete ${idExists.studentName} with the ID of: ${IDController.text} from the class?\nThis cannot be reversed."),
+                                                    ],
+                                                  )
+                                              ),
+                                            actions: [
+                                              ElevatedButton(
+                                                child: Text("Cancel"),
+                                                onPressed: (){
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.red,
+                                                  onPrimary: Colors.white,
+                                                  textStyle: TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                  ),
+                                                child: Text("Delete student"),
+                                                onPressed: (){
+                                                  students.deleteStudent(unitID, weekNumber, widget.numberOfWeeks, idExists);
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                }
+                                              ),
+                                            ],
+                                          );
+                                        });
+
+                                  }
+                                  else{
+                                    print("student does not exists");
+                                    //ID does not exist
+                                    showDialog(context: context,
+                                        barrierDismissible: true,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                              content: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                          "Student with ID of: ${IDController.text} does not exist."),
+                                                    ],
+                                                  )
+                                              )
+                                          );
+                                        });
+                                  }
+
+                                },
+                              ),
+                            ],
+                          );
+
+                        }
+                    );
+
+                    //students.deleteStudent(unitID, weekNumber, widget.numberOfWeeks, Student(studentName: "doesnMater", studentID: "5", grade: "UG"));
+
+                  },
+                  child: const Text("Remove a student"),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    onPrimary: Colors.white,
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                );
   }
 
   ElevatedButton BuildAddButton(BuildContext context, StudentModel students) {
@@ -602,9 +646,6 @@ class _ClassViewSt extends State<ClassViewSt> {
                         );
                       }
                     );
-
-                    //Student newstu = new Student(studentName: "Test", studentID: "101044", grade: "UG");
-                    //students.addStudent(unitID, weekNumber, widget.numberOfWeeks, newstu);
                   },
                   child: const Text("Add a student"),
                   style: ElevatedButton.styleFrom(
@@ -643,12 +684,6 @@ class _ClassViewSt extends State<ClassViewSt> {
     }
 
 
-
-
-
-
-    print("called buildListView");
-    print("student length: ${students.listOfStudents.length}");
     return ListView.builder(
         padding: EdgeInsets.all(8),
         scrollDirection: Axis.vertical,
@@ -668,7 +703,8 @@ class _ClassViewSt extends State<ClassViewSt> {
               onChanged: (String? newValue) {
                 setState(() {
                   dropDownValue = newValue!;
-                  print("Value changed to $dropDownValue");
+                  student.grade = dropDownValue;
+                  students.update(unitID, weekNumber, student);
                 });
               }, //Gets the changed value
 

@@ -25,7 +25,7 @@ class Student {
 
 
 class StudentModel extends ChangeNotifier{
-  final List<Student> listOfStudents = [];
+  List<Student> listOfStudents = [];
 
   CollectionReference unitCollection = FirebaseFirestore.instance.collection("units");
 
@@ -37,6 +37,29 @@ class StudentModel extends ChangeNotifier{
 
   StudentModel(int weekNumber, String unitID){
     fetchWeek(weekNumber, unitID);
+  }
+
+
+
+  void sortByAscending(){
+    listOfStudents.sort((a,b) => a.studentName.compareTo(b.studentName));
+    notifyListeners();
+  }
+
+  void sortByDescending(){
+
+    listOfStudents.sort((b,a) => a.studentName.compareTo(b.studentName));
+    notifyListeners();
+  }
+
+  void sortByGraded(){
+    listOfStudents.sort((a,b) => a.grade.compareTo(b.grade));
+    notifyListeners();
+  }
+
+  void sortByUnGraded(){
+    listOfStudents.sort((b,a) => a.grade.compareTo(b.grade));
+    notifyListeners();
   }
 
   void fetchWeek(int weekNumber, String unitID) async{
@@ -64,6 +87,18 @@ class StudentModel extends ChangeNotifier{
         loading = false;
         notifyListeners();
       }
+    });
+  }
+
+
+  void update(String unitID, int weeknumber, Student updateGrade) async{
+    loading = true;
+    var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weeknumber).get();
+    querySnap.docs.forEach((doc) async {
+      unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students").doc(updateGrade.doc_id).set(updateGrade.toJson());
+
+      //Update
+      fetchWeek(weeknumber, unitID);
     });
   }
 

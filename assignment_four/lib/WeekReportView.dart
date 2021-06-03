@@ -1,9 +1,20 @@
+import 'dart:io';
+
+import 'package:assignment_four/unit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 
 class WeekReportView extends StatefulWidget {
-  //const WeekReportView({Key key}) : super(key: key);
+
+  final int weekNumber;
+  final String unit;
+
+  final double attendance;
+  final String gradeAverage;
+  final List<String> studentReport;
+
+  WeekReportView({Key? key, required this.unit, required this.weekNumber, required this.studentReport, required this.attendance, required this.gradeAverage }) : super(key: key);
 
   @override
   _WeekReportViewState createState() => _WeekReportViewState();
@@ -21,7 +32,7 @@ class _WeekReportViewState extends State<WeekReportView> {
           icon: Icon(Icons.arrow_back_sharp, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("TODO WEEK NUMBER"),//TODO UNIT CODE
+        title: Text("Week report for ${widget.unit}"),//TODO UNIT CODE
         centerTitle: true,
       ),
 
@@ -38,12 +49,12 @@ class _WeekReportViewState extends State<WeekReportView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Report for Week N",
+                      Text("Report for Week ${widget.weekNumber}",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: fontSizeVar * 1.5,
                           ),
-                      ),//TODO CHANGE TO VARIABLE
+                      ),
                     ],
                   ),
                 Container(
@@ -59,7 +70,7 @@ class _WeekReportViewState extends State<WeekReportView> {
                         ),
                       ),
 
-                      Text("XXXXX TODO",//TODO TO VARIABLE
+                      Text("${widget.gradeAverage}",//TODO TO VARIABLE
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: fontSizeVar,
@@ -81,7 +92,7 @@ class _WeekReportViewState extends State<WeekReportView> {
                         ),
                       ),
 
-                      Text("XXXXX TODO",//TODO TO VARIABLE
+                      Text("${widget.attendance.toStringAsFixed(2)}%",//TODO TO VARIABLE
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: fontSizeVar,
@@ -110,10 +121,11 @@ class _WeekReportViewState extends State<WeekReportView> {
                               padding: EdgeInsets.all(8),
                               scrollDirection: Axis.vertical,
 
-                              itemBuilder: (_, index) {
+                              itemBuilder: (context, index) {
+                                var student = widget.studentReport[index];
                                 return Container(
                                   child: ListTile(
-                                    title:Text("STUDENT, STUDENT ID, GRADE",
+                                    title:Text(student,
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
@@ -124,11 +136,9 @@ class _WeekReportViewState extends State<WeekReportView> {
                                   ),
                                 );
                               },
-                              itemCount:15
-
+                              itemCount: widget.studentReport.length
                           ),
                         ),
-
                       )
                     ],
                   ),
@@ -147,6 +157,22 @@ class _WeekReportViewState extends State<WeekReportView> {
                           ),
                       ),
                       onPressed: () {
+
+                        // //https://stackoverflow.com/questions/51091785/how-do-you-open-the-default-email-app-on-an-iphone-with-flutter
+                        // Future<void> _launched;
+                        // Future<void> _openURL(String url) async{
+                        //   if (await canLaunch(url)){
+                        //     await launch(url);
+                        //   }
+                        //   else{
+                        //     throw 'Could not launch $url';
+                        //   }
+                        // }
+
+                        setState(() {
+                          _launched = _openURL('mailto:');
+                        });
+
                         print('Email Report pressed ...'); //TODO
                       }, // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));
                       child: const Text('Email report'),

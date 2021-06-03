@@ -17,27 +17,28 @@ import 'ClassView.dart';
     3. Create WEEK model to generate student list items                             ✔
       3.a. then add marking single scheme (HD / A)                                  ✔
       3.b. add swapping between weeks                                               ✔
-      3.c. then generation of each scheme *NTH*
+      3.c. then generation of each scheme *NTH*                                   nth (04/06)
     4. Create movement from student name to student detail page
-      4.a. Get name ✔, student ID ✔, then get photo *NTH*
+      4.a. Get name ✔, student ID ✔, then get photo *NTH*                         today (03/06)
     5. Back in class view
       5.a. Add student                                                              ✔
       5.b. Delete student                                                           ✔
       5.c. Grade student                                                            ✔
-      5.d. Change scheme functionality *NTH*
-      5.e. Test that works *NTH*
-      5.f. Generate summary for unit *NTH*
-      5.g. Sort list of students                                                    ✔
+      5.d. Change scheme functionality *NTH*                                        nth (04/06)
+      5.e. Test that works *NTH*                                                    nth (04/06)
+      5.f. Generate summary for unit *NTH*                                          nth (07/06)
+      5.g. Sort list of students                                                    ✔ ADD ID FILTERERING
+      5.g. Search through students either by ID or Name   nth today (03/06)
     6. Student detail view
-      6.a. Take new photo
-      6.b. Remove photo
-      6.c. Choose photo
-      6.d. Change name and save
-      6.e. Generate student unit information summary
+      6.a. Take new photo                                                         nth today  (03/06)
+      6.b. Remove photo                                                           nth today  (03/06)
+      6.c. Choose photo                                                           nth today  (03/06)
+      6.d. Change name and save                                                 Due by today (03/06)
+      6.e. Generate student unit information summary                               nth (04/06)
     7. Week report view
-      7.a. Generate grade average
-      7.b. Generate attendance percentage
-      7.c. Populate the report summary view from the week it entered from
+      7.a. Generate grade average                                               Due by today (03/06)
+      7.b. Generate attendance percentage                                       Due by today (03/06)
+      7.c. Populate the report summary view from the week it entered from       Due by today (03/06)
     8. Bug fixes, report
 
 

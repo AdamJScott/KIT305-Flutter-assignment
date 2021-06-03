@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -27,8 +28,6 @@ bool isNumericUsing_tryParse(String string) {
   }
   return true;
 }
-
-
 
 
 class ClassView extends StatelessWidget {
@@ -330,7 +329,41 @@ class _ClassViewSt extends State<ClassViewSt> {
                   DeleteStudentButton(context, students),//REMOVE STUDENT
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) { return WeekReportView(); }));//print('View Report pressed ...'); //TODO
+
+                      double attendancePercentage = 0.0;
+                      String gradeAverage = "";
+
+                      List<String>studentReport = [];
+                      var map = Map();
+                      studentReport.add("Unit: ${widget.unitname}, Week number: ${weekNumber}\n");
+                      studentReport.add("Student Name, StudentID, Grade Received\n");
+                      //TODO GENERATE REPORT
+                      for (Student student in students.listOfStudents){
+
+                        if (!map.containsKey(student.grade)){
+                          map[student.grade] = 1;
+                        }
+                        else{
+                          map[student.grade] += 1;
+                        }
+                        //Report generation
+                        studentReport.add("${student.studentName}, ${student.studentID}, ${student.grade}\n");
+                      }
+
+                      var sortedMap = map.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+                      gradeAverage = sortedMap.first.key.toString();
+
+                      var numberOfUGs = map["UG"];
+
+                      if (numberOfUGs == null){
+                        attendancePercentage = 100;
+                      }
+                      else{
+                        attendancePercentage = ((students.listOfStudents.length - numberOfUGs) / students.listOfStudents.length) * 100;
+                      }
+                      print(attendancePercentage);
+
+                      Navigator.push(context, MaterialPageRoute(builder: (context) { return WeekReportView(unit: widget.unitname, weekNumber: weekNumber, studentReport: studentReport, attendance: attendancePercentage, gradeAverage: gradeAverage); }));//print('View Report pressed ...'); //TODO
                     },
                     child: const Text("View Report"),
                     style: ElevatedButton.styleFrom(
@@ -447,7 +480,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                  child: Text("Delete student"),
+                                  child: Text("Unenrol student"),
                                 onPressed: (){
                                     //Create new dialog that gets the student ID, if not, return something else
                                   Student idExists = students.listOfStudents.firstWhere((studentIDNumber) => studentIDNumber.studentID == IDController.text, orElse: () => new Student(studentName: "", studentID: "", grade: ""));
@@ -466,7 +499,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
                                                       Text(
-                                                          "Are you sure you want to delete ${idExists.studentName} with the ID of: ${IDController.text} from the class?\nThis cannot be reversed."),
+                                                          "Are you sure you want to unenrol ${idExists.studentName} with the ID of: ${IDController.text} from the class?\nThis cannot be reversed."),
                                                     ],
                                                   )
                                               ),
@@ -485,7 +518,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                                                     color: Colors.white,
                                                   ),
                                                   ),
-                                                child: Text("Delete student"),
+                                                child: Text("Unenrol student"),
                                                 onPressed: (){
                                                   students.deleteStudent(unitID, weekNumber, widget.numberOfWeeks, idExists);
                                                   Navigator.pop(context);
@@ -498,7 +531,7 @@ class _ClassViewSt extends State<ClassViewSt> {
 
                                   }
                                   else{
-                                    print("student does not exists");
+                                    print("Student does not exist within this week");
                                     //ID does not exist
                                     showDialog(context: context,
                                         barrierDismissible: true,

@@ -3,11 +3,13 @@ import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mailto/mailto.dart';
 import 'package:provider/provider.dart';
 
 import 'package:assignment_four/StudentDetailView.dart';
 import 'package:assignment_four/WeekReportView.dart';
 import 'package:assignment_four/student.dart';
+import 'package:url_launcher/url_launcher.dart';
 //TODO https://rsainik80.medium.com/dropdown-button-inside-listview-builder-in-flutter-e2eb74fb45b4
 
 //Helper functions
@@ -147,7 +149,6 @@ class _ClassViewSt extends State<ClassViewSt> {
 
   @override
   void initState() {
-    // TODO: implement initState
     searchFieldController = TextEditingController();
     weekNoText = "Week ${weekNumber}";
 
@@ -173,7 +174,7 @@ class _ClassViewSt extends State<ClassViewSt> {
         onPressed: () => Navigator.of(context).pop(),
 
       ),
-      title: Text(widget.unitname),//TODO UNIT CODE IS DONE
+      title: Text(widget.unitname),
       centerTitle: true,
     ),
 
@@ -196,7 +197,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                     LastElevatedButton(style, students),
                     Align(
                       child: Text(
-                        weekNoText, //TODO CHANGE TO VARIABLE
+                        weekNoText,
                         style: TextStyle(
                           fontSize: 20,
                         ),
@@ -211,7 +212,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    'Marking Scheme: ${students.markingScheme}', //TODO change to variable
+                    'Marking Scheme: ${students.markingScheme}',
                     ),
                 ],
               ), // row for marking scheme label
@@ -236,16 +237,16 @@ class _ClassViewSt extends State<ClassViewSt> {
                         },
                       ),
                       TextButton(
-                        child: Text("Graded"),
+                        child: Text("ID"),
                         onPressed: () {
-                          students.sortByGraded();
+                          students.sortByID();
 
                         },
                       ),
                       TextButton(
-                        child: Text("Ungraded"),
+                        child: Text("Grade"),
                         onPressed: () {
-                          students.sortByUnGraded();
+                          students.sortByGraded();
                         },
                       ),
                     ]
@@ -308,9 +309,28 @@ class _ClassViewSt extends State<ClassViewSt> {
                 children: [
                   BuildAddButton(context, students),//ADD STUDENT
                   ElevatedButton(
-                    onPressed: () {
-                      print('Email Report pressed ...'); //TODO
-                    },
+                    onPressed: () async {
+
+                      List<String> studentReport = [];
+
+                      for (Student student in students.listOfStudents){
+                        //Report generation
+                        studentReport.add("${student.studentName}, ${student.studentID}, ${student.grade}\n");
+                      }
+
+                      launchMailto() async {
+                          final mailtoLink = Mailto(
+                            to: ["enterEmailHere@email.com"],
+                            cc: [""],
+                            subject: "Week report for week ${weekNumber}",
+                            body: studentReport.join(""),
+                          );
+
+                          await launch('${mailtoLink}');
+                        }
+
+                        launchMailto();
+                      },
                     child: const Text("Email Report"),
                     style: ElevatedButton.styleFrom(
                       primary: Colors.blue,
@@ -727,8 +747,10 @@ class _ClassViewSt extends State<ClassViewSt> {
             onLongPress: () {
               Navigator.push(
                 context, MaterialPageRoute(builder: (context) {
-                  return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname);
-                }));
+                  return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, numberOfWeeks: widget.numberOfWeeks);
+                })).then((value) {
+                students.fetchWeek(weekNumber, unitID);
+              });
             },
             subtitle: Text(student.studentID),
             trailing:  new DropdownButton<String>(

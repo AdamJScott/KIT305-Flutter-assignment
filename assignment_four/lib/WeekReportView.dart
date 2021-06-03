@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:assignment_four/unit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mailto/mailto.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class WeekReportView extends StatefulWidget {
@@ -156,24 +158,20 @@ class _WeekReportViewState extends State<WeekReportView> {
                             fontSize: fontSizeVar,
                           ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        launchMailto() async {
+                          final mailtoLink = Mailto(
+                            to: ["enterEmailHere@email.com"],
+                            cc: [""],
+                            subject: "Week report for week ${widget
+                                .weekNumber}",
+                            body: widget.studentReport.join(""),
+                          );
 
-                        // //https://stackoverflow.com/questions/51091785/how-do-you-open-the-default-email-app-on-an-iphone-with-flutter
-                        // Future<void> _launched;
-                        // Future<void> _openURL(String url) async{
-                        //   if (await canLaunch(url)){
-                        //     await launch(url);
-                        //   }
-                        //   else{
-                        //     throw 'Could not launch $url';
-                        //   }
-                        // }
+                          await launch('${mailtoLink}');
+                        }
 
-                        setState(() {
-                          _launched = _openURL('mailto:');
-                        });
-
-                        print('Email Report pressed ...'); //TODO
+                        launchMailto();
                       }, // ADD MOVEMENT Navigator.push(context, MaterialPageRoute(builder: (context) { return MovieDetails(id:index); }));
                       child: const Text('Email report'),
                     ),

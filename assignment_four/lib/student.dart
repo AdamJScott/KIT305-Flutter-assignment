@@ -62,6 +62,11 @@ class StudentModel extends ChangeNotifier{
     notifyListeners();
   }
 
+  void sortByID(){
+    listOfStudents.sort((a,b) => int.parse(a.studentID).compareTo(int.parse(b.studentID)));
+    notifyListeners();
+  }
+
   void fetchWeek(int weekNumber, String unitID) async{
     loading = true;
     notifyListeners();
@@ -142,7 +147,10 @@ class StudentModel extends ChangeNotifier{
 
 }
 
-class singleStudent extends ChangeNotifier{
+class SingleStudent extends ChangeNotifier{
+
+
+  CollectionReference unitCollection = FirebaseFirestore.instance.collection("units");
 
 
 

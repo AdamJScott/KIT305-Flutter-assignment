@@ -21,7 +21,7 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       3.b. add swapping between weeks                                           ✔
       3.c. then generation of each scheme *NTH*                                   nth (04/06)
     4. Create movement from student name to student detail page
-      4.a. Get name ✔, student ID ✔, then get photo *NTH*                         today (03/06)
+      4.a. Get name ✔, student ID ✔, then get photo ✔                          ✔
     5. Back in class view
       5.a. Add student                                                          ✔
       5.b. Delete student                                                       ✔
@@ -34,8 +34,8 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       5.h. Email week report                                                    ✔
     6. Student detail view
       6.a. Take new photo                                                       ✔
-      6.b. Remove photo                                                           nth today  (03/06)
-      6.c. Choose photo                                                           nth today  (03/06)
+      6.b. Remove photo                                                         ✔
+      6.c. Choose photo                                                         ✔
       6.d. Change name and save                                                 ✔
       6.e. Generate student unit information summary                               nth (04/06)
     7. Week report view

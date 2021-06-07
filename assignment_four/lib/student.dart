@@ -97,12 +97,12 @@ class StudentModel extends ChangeNotifier{
 
 
   void update(String unitID, int weeknumber, Student updateGrade, bool update) async{
-    loading = true;
     var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weeknumber).get();
     querySnap.docs.forEach((doc) async {
       unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students").doc(updateGrade.doc_id).set(updateGrade.toJson());
       //Update
       if (update){
+        loading = true;
         fetchWeek(weeknumber, unitID);
       }
     });

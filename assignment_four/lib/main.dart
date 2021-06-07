@@ -26,8 +26,8 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       5.a. Add student                                                          ✔
       5.b. Delete student                                                       ✔
       5.c. Grade student                                                        ✔
-      5.d. Change scheme functionality *NTH*                                        due 7/06
-      5.e. Test that works *NTH*                                                    due 7/06
+      5.d. Change scheme functionality *NTH*                                    ✔
+      5.e. Test that works *NTH*                                                ✔
       5.f. Generate summary for unit *NTH*                                          nth (07/06) due 08/06
       5.g. Sort list of students                                                ✔
       5.g. Search through students either by ID or Name   nth today (03/06)

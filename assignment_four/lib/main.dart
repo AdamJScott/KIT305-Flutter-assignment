@@ -43,8 +43,7 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       7.b. Generate attendance percentage                                       ✔
       7.c. Populate the report summary view from the week it entered from       ✔
     8. Bug fixes, report                                                            due 09/06
-      8.a. Spam clicking through the weeks will make the students populate double / triple / n up.
-      8.b. with checkpoint add int fails for symbols with alerts and set a upper limit
+
 
     9. Create a logger for all adding, grading, removing options so you can see what lindsay does
 

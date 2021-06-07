@@ -450,6 +450,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                       Set the week gradescheme on firebase to the new marking scheme
                      */
                     TextEditingController IDController = TextEditingController();
+                    String chkText = "Enter in the number of checkpoints you wish for the week to have:";
 
                     showDialog(
                       context: context,
@@ -544,26 +545,44 @@ class _ClassViewSt extends State<ClassViewSt> {
                                                   child: Column(
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      Text("Enter in the number of checkpoints you wish for the week to have:"),
+                                                      Text(chkText),
                                                       Container(
                                                         width: 150,
                                                         height: 50,
                                                         child: TextField(
                                                           controller: IDController,
+                                                          textAlign: TextAlign.center,
                                                           keyboardType: TextInputType.number,
                                                           onSubmitted: (value) {
-
                                                             int numberOfCheckpoints = int.parse(value);
-                                                            String gradeScheme = "chk$numberOfCheckpoints";
-                                                            for (Student stu in students.listOfStudents){
-                                                              stu.grade = "Check 0";
-                                                              students.update(unitID, weeknumber, stu, false);
+                                                            if(int.tryParse(value) != null && numberOfCheckpoints < 20 && numberOfCheckpoints > 0){
+                                                              String gradeScheme = "chk$numberOfCheckpoints";
+                                                              for (Student stu in students.listOfStudents){
+                                                                stu.grade = "Check 0";
+                                                                students.update(unitID, weeknumber, stu, false);
+                                                              }
+                                                              students.updateWeekGradeScheme(unitID, weeknumber, gradeScheme);
+                                                              reassemble();
+                                                              Navigator.pop(context);
+                                                              Navigator.pop(context);
                                                             }
-                                                            students.updateWeekGradeScheme(unitID, weeknumber, gradeScheme);
-                                                            reassemble();
-                                                            Navigator.pop(context);
-                                                            Navigator.pop(context);
-
+                                                            else{
+                                                              showDialog(context: context, builder: (BuildContext context){
+                                                                return AlertDialog(
+                                                                  scrollable: false,
+                                                                  content: Padding(
+                                                                    padding: const EdgeInsets.all(8.0),
+                                                                    child: Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      children: [
+                                                                        Text("Please enter in a real number that more than 0, and is less than 20\nPositive numbers only with no symbols"),
+                                                                        ElevatedButton(onPressed: () { Navigator.pop(context); }, child: Text("Okay", textAlign: TextAlign.justify,)),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              });
+                                                            }
                                                           },
                                                         )
                                                       ),
@@ -618,32 +637,38 @@ class _ClassViewSt extends State<ClassViewSt> {
 
   ElevatedButton NextElevatedButton(ButtonStyle style, StudentModel students) {
     return ElevatedButton(
-                    style: style,
-                    onPressed: () {
-                      weekNumber = incrementWeek(weekNumber, widget.numberOfWeeks);
+      style: style,
+      onPressed: () {
+        if (students.loading == false) {
+          weekNumber = incrementWeek(weekNumber, widget.numberOfWeeks);
+          setState(() {
+            weekNoText = "Week ${weekNumber}";
+            students.fetchWeek(weekNumber, unitID);
+          });
+        }
+      },
 
-                      setState(() {
-                        weekNoText = "Week ${weekNumber}";
-                        students.fetchWeek(weekNumber, unitID);
-                      });
-
-                    },
-                    child: const Text("Next"),
-                  );
+      child: const Text("Next"),
+    );
   }
 
   ElevatedButton LastElevatedButton(ButtonStyle style, StudentModel students) {
+
     return ElevatedButton(
-                    style: style,
-                    onPressed: () {
-                      weekNumber = decrementWeek(weekNumber, widget.numberOfWeeks);
-                      setState(() {
-                        weekNoText = "Week ${weekNumber}";
-                        students.fetchWeek(weekNumber, unitID);
-                      });
-                    },
-                    child: const Text("Last"),
-                  );
+      style: style,
+
+      onPressed: () {
+        if (students.loading == false) {
+          weekNumber = decrementWeek(weekNumber, widget.numberOfWeeks);
+          setState(() {
+            weekNoText = "Week ${weekNumber}";
+            students.fetchWeek(weekNumber, unitID);
+          });
+        }
+      },
+      child: const Text("Last"),
+    );
+
   }
 
   ElevatedButton DeleteStudentButton(BuildContext context, StudentModel students) {

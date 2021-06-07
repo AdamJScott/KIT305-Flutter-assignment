@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -400,7 +401,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  changeMarkScheme(students),//Change Marking scheme
+                  changeMarkScheme(students, weekNumber),//Change Marking scheme
                 ],
               )//ROW FOR CHANGE MARKING SCHEME
             ],
@@ -411,7 +412,7 @@ class _ClassViewSt extends State<ClassViewSt> {
   );
   }
 
-  ElevatedButton changeMarkScheme(StudentModel students) {
+  ElevatedButton changeMarkScheme(StudentModel students, int weeknumber) {
     return ElevatedButton(
 
                   onPressed: () {
@@ -420,14 +421,82 @@ class _ClassViewSt extends State<ClassViewSt> {
 
                     //TODO
                     /*
-                      Make alert dialog full of buttons
+                      Make alert dialog full of buttons for each thing, another alert for checkpoints?
                       Get selection
                       Change all grades to UG, and update firebase
                       Set the week gradescheme on firebase to the new marking scheme
                      */
+                    TextEditingController IDController = TextEditingController();
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (BuildContext context)
+                      {
+                        return AlertDialog(
+                          scrollable: false,
+                          content: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Form(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text("Select a new scheme for this week\nNote that selecting any scheme will reset the grades.\n", textAlign: TextAlign.center),
+                                    ElevatedButton(onPressed: () {
+                                      for (Student stu in students.listOfStudents){
+                                        stu.grade = "UG";
+                                        students.update(unitID, weeknumber, stu, false);
+                                      }
+                                      students.updateWeekGradeScheme(unitID, weeknumber, "hd");
+                                      reassemble();
+                                      Navigator.pop(context);
+
+                                    }, child: Text("HD DN CR PP NN UG", textAlign: TextAlign.justify)),
+                                    ElevatedButton(onPressed: () {
+                                      for (Student stu in students.listOfStudents){
+                                        stu.grade = "UG";
+                                        students.update(unitID, weeknumber, stu, false);
+                                      }
+                                      students.updateWeekGradeScheme(unitID, weeknumber, "a");
+                                      reassemble();
+                                      Navigator.pop(context);
+
+                                    }, child: Text("A B C D F UG", textAlign: TextAlign.justify)),
+                                    ElevatedButton(onPressed: () {
+                                      for (Student stu in students.listOfStudents){
+                                        stu.grade = "Absent";
+                                        students.update(unitID, weeknumber, stu, false);
+                                      }
+                                      students.updateWeekGradeScheme(unitID, weeknumber, "att");
+                                      reassemble();
+                                      Navigator.pop(context);
+
+                                    }, child: Text("Present / Absent", textAlign: TextAlign.justify)),
+                                    ElevatedButton(onPressed: () {
+                                      for (Student stu in students.listOfStudents){
+                                        stu.grade = "0";
+                                        students.update(unitID, weeknumber, stu, false);
+                                      }
+                                      students.updateWeekGradeScheme(unitID, weeknumber, "num");
+                                      reassemble();
+                                      Navigator.pop(context);
+
+                                    }, child: Text("Numeric 0 to 100", textAlign: TextAlign.justify)),
+                                    ElevatedButton(onPressed: () {
+                                      //Go to new alert with form
+                                      
 
 
 
+                                    }, child: Text("Checkpoints", textAlign: TextAlign.justify)),
+                                    Text("Click anywhere outside this popup to cancel.\n", textAlign: TextAlign.center),
+                                  ],
+                                )
+                            ),
+                          ),
+                        );
+                      }
+                    );
                   },
                   child: const Text("Change marking scheme"),
                   style: ElevatedButton.styleFrom(
@@ -733,14 +802,12 @@ class _ClassViewSt extends State<ClassViewSt> {
     grades.clear();
     int numberOfChkns = 0;
 
-
     if (gradeScheme.length > 3){
       //then it's chkn
       numberOfChkns = int.parse(gradeScheme.substring(3).toString());
       print(numberOfChkns);
       gradeScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
     }
-
 
     switch (gradeScheme){
       case "hd":
@@ -766,7 +833,10 @@ class _ClassViewSt extends State<ClassViewSt> {
         break;
     }
 
-    print(grades);
+
+    if (students.listOfStudents.length != students.numberOfStudents){
+
+    }
 
     return ListView.builder(
         padding: EdgeInsets.all(8),
@@ -774,6 +844,7 @@ class _ClassViewSt extends State<ClassViewSt> {
         shrinkWrap: true,
         itemBuilder: (context, index) {
           var student = students.listOfStudents[index];
+
           if (student.grade.contains("UG") && gradeScheme == "att"){
             print("STUDENT UG");
             student.grade = grades.last;
@@ -801,7 +872,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                     setState(() {
                       dropDownValue = newValue!;
                       student.grade = dropDownValue;
-                      students.update(unitID, weekNumber, student);
+                      students.update(unitID, weekNumber, student, true);
                     });
                   }, //Gets the changed value
                   items: grades.map((String value) {
@@ -845,7 +916,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                       gradeToSubmit = int.parse(value);
                     }
                     student.grade = gradeToSubmit.toString();
-                    students.update(unitID, weekNumber, student);
+                    students.update(unitID, weekNumber, student, true);
                   },
                 ),
               ),

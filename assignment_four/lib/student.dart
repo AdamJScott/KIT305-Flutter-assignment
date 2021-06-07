@@ -26,6 +26,7 @@ class Student {
 
 class StudentModel extends ChangeNotifier{
   List<Student> listOfStudents = [];
+  int numberOfStudents = 0;
 
   CollectionReference unitCollection = FirebaseFirestore.instance.collection("units");
 
@@ -84,10 +85,9 @@ class StudentModel extends ChangeNotifier{
           var student = new Student(studentName: stuFound.get("studentName"), studentID: stuFound.get("studentID"), grade: stuFound.get("grade"));
           student.doc_id = stuFound.id;
           listOfStudents.add(student);
-          print("List of students after adding one: ${listOfStudents.length}");
+          numberOfStudents += 1;
           //print("Found student ${student.studentName}");
         });
-
 
         loading = false;
         notifyListeners();
@@ -96,14 +96,15 @@ class StudentModel extends ChangeNotifier{
   }
 
 
-  void update(String unitID, int weeknumber, Student updateGrade) async{
+  void update(String unitID, int weeknumber, Student updateGrade, bool update) async{
     loading = true;
     var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weeknumber).get();
     querySnap.docs.forEach((doc) async {
       unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students").doc(updateGrade.doc_id).set(updateGrade.toJson());
-
       //Update
-      fetchWeek(weeknumber, unitID);
+      if (update){
+        fetchWeek(weeknumber, unitID);
+      }
     });
   }
 
@@ -142,6 +143,20 @@ class StudentModel extends ChangeNotifier{
         fetchWeek(weekNumber, unitID);
       }
     }
+  }
+  
+  void updateWeekGradeScheme(String unitID, int weekNumber, String newScheme) async{
+    loading = true;
+    notifyListeners();
+    
+    var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weekNumber).get();
+    querySnap.docs.forEach((weekToUpdate) async{ 
+      await unitCollection.doc(unitID).collection("weeks").doc(weekToUpdate.id).update({"gradeScheme": newScheme});
+      fetchWeek(weekNumber, unitID);
+    });
+
+    //loading = false;
+    notifyListeners();
   }
 
 

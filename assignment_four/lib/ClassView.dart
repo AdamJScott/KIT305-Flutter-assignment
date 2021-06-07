@@ -400,21 +400,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-
-                    onPressed: () {
-                      print('Change mark scheme pressed ...'); //TODO
-                    },
-                    child: const Text("Change marking scheme"),
-                    style: ElevatedButton.styleFrom(
-                      fixedSize: Size.fromWidth(250),
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),//Change Marking scheme
+                  changeMarkScheme(students),//Change Marking scheme
                 ],
               )//ROW FOR CHANGE MARKING SCHEME
             ],
@@ -423,6 +409,36 @@ class _ClassViewSt extends State<ClassViewSt> {
       ),
     ),
   );
+  }
+
+  ElevatedButton changeMarkScheme(StudentModel students) {
+    return ElevatedButton(
+
+                  onPressed: () {
+                    print(students);
+                    print('Change mark scheme pressed ...'); //TODO
+
+                    //TODO
+                    /*
+                      Make alert dialog full of buttons
+                      Get selection
+                      Change all grades to UG, and update firebase
+                      Set the week gradescheme on firebase to the new marking scheme
+                     */
+
+
+
+                  },
+                  child: const Text("Change marking scheme"),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size.fromWidth(250),
+                    primary: Colors.blue,
+                    onPrimary: Colors.white,
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                );
   }
 
   ElevatedButton NextElevatedButton(ButtonStyle style, StudentModel students) {
@@ -713,7 +729,18 @@ class _ClassViewSt extends State<ClassViewSt> {
 
   ListView buildListView(StudentModel students, String gradeScheme) {
 
-    List<String> grades;
+    List<String> grades = <String>[];
+    grades.clear();
+    int numberOfChkns = 0;
+
+
+    if (gradeScheme.length > 3){
+      //then it's chkn
+      numberOfChkns = int.parse(gradeScheme.substring(3).toString());
+      print(numberOfChkns);
+      gradeScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
+    }
+
 
     switch (gradeScheme){
       case "hd":
@@ -723,56 +750,107 @@ class _ClassViewSt extends State<ClassViewSt> {
         grades = <String>['A', 'B', 'C', 'D', 'F', 'UG'];
         break;
       case "att":
-        grades = <String>['Attended', 'Not attended'];
+        grades = <String>['Present', 'Absent'];
         break;
       case "num":
-        grades = <String>['100', '90', '80', '70', '60', '50'];
+        grades = <String>['100', '90', '80', '70', '60', '50', '0'];
         break;
       case "chk":
-        grades = <String>['a'];
+        grades = <String>[];
+        for (int i = 0; i < numberOfChkns + 1; i++){
+          grades.add("Check $i");
+        }
         break;
       default:
         grades = <String>['something broke'];
         break;
     }
 
+    print(grades);
 
     return ListView.builder(
         padding: EdgeInsets.all(8),
         scrollDirection: Axis.vertical,
+        shrinkWrap: true,
         itemBuilder: (context, index) {
           var student = students.listOfStudents[index];
-          return ListTile(
-            title: Text(student.studentName),
-            onLongPress: () {
-              Navigator.push(
-                context, MaterialPageRoute(builder: (context) {
+          if (student.grade.contains("UG") && gradeScheme == "att"){
+            print("STUDENT UG");
+            student.grade = grades.last;
+          }
+          else if (student.grade.contains("UG") && gradeScheme == "num"){
+            student.grade = "0";
+          }
+
+          if (gradeScheme != "num") {
+            return ListTile(
+              title: Text(student.studentName),
+              onLongPress: () {
+                Navigator.push(
+                  context, MaterialPageRoute(builder: (context) {
+                    return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, numberOfWeeks: widget.numberOfWeeks);
+                  })).then((value) {
+                  students.fetchWeek(weekNumber, unitID);
+                });
+              },
+              subtitle: Text(student.studentID),
+              trailing:
+                new DropdownButton<String>(
+                  value: student.grade,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropDownValue = newValue!;
+                      student.grade = dropDownValue;
+                      students.update(unitID, weekNumber, student);
+                    });
+                  }, //Gets the changed value
+                  items: grades.map((String value) {
+                    return new DropdownMenuItem<String>(
+                      child: new Text(value),
+                      value: value,
+                    );
+                  }).toList(), //Creates the text for each element in list
+
+                ),
+              );
+          }
+          else{
+            TextEditingController controlBoi = TextEditingController();
+            controlBoi.text = student.grade;
+
+            return ListTile(
+              title: Text(student.studentName),
+              onLongPress: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) {
                   return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, numberOfWeeks: widget.numberOfWeeks);
                 })).then((value) {
-                students.fetchWeek(weekNumber, unitID);
-              });
-            },
-            subtitle: Text(student.studentID),
-            trailing:  new DropdownButton<String>(
-              value: student.grade,
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropDownValue = newValue!;
-                  student.grade = dropDownValue;
-                  students.update(unitID, weekNumber, student);
+                  students.fetchWeek(weekNumber, unitID);
                 });
-              }, //Gets the changed value
+              },
+              subtitle: Text(student.studentID),
+              trailing: Container(
+                width: 75,
+                height: 50,
+                child: TextField(
+                  controller: controlBoi,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (value) {
+                    int gradeToSubmit;
 
-              items: grades.map((String value) {
-                return new DropdownMenuItem<String>(
-                  child: new Text(value),
-                  value: value,
-                );
-              }).toList(), //Creates the text for each element in list
-
+                    if (int.parse(value) > 100){
+                      gradeToSubmit = 100;
+                    }
+                    else{
+                      gradeToSubmit = int.parse(value);
+                    }
+                    student.grade = gradeToSubmit.toString();
+                    students.update(unitID, weekNumber, student);
+                  },
+                ),
               ),
-
             );
+          }
         },
         itemCount: students.listOfStudents.length
     );

@@ -19,31 +19,31 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
     3. Create WEEK model to generate student list items                         ✔
       3.a. then add marking single scheme (HD / A)                              ✔
       3.b. add swapping between weeks                                           ✔
-      3.c. then generation of each scheme *NTH*                                   nth (04/06)
+      3.c. then generation of each scheme *NTH*                                   due 7/06
     4. Create movement from student name to student detail page
       4.a. Get name ✔, student ID ✔, then get photo ✔                          ✔
     5. Back in class view
       5.a. Add student                                                          ✔
       5.b. Delete student                                                       ✔
       5.c. Grade student                                                        ✔
-      5.d. Change scheme functionality *NTH*                                        nth (04/06)
-      5.e. Test that works *NTH*                                                    nth (04/06)
-      5.f. Generate summary for unit *NTH*                                          nth (07/06)
+      5.d. Change scheme functionality *NTH*                                        due 7/06
+      5.e. Test that works *NTH*                                                    due 7/06
+      5.f. Generate summary for unit *NTH*                                          nth (07/06) due 08/06
       5.g. Sort list of students                                                ✔
       5.g. Search through students either by ID or Name   nth today (03/06)
       5.h. Email week report                                                    ✔
     6. Student detail view
-      6.a. Take new photo                                                       ✔
+      6.a. Take new photo                                                       ✔            CHANGE TO THE FIREBASE REFERENCE SO WHEN NAME CHANGES SAME PIC IS USED
       6.b. Remove photo                                                         ✔
       6.c. Choose photo                                                         ✔
       6.d. Change name and save                                                 ✔
-      6.e. Generate student unit information summary                               nth (04/06)
+      6.e. Generate student unit information summary                               nth (07/06) due 08/06
     7. Week report view
       7.a. Generate grade average                                               ✔
       7.b. Generate attendance percentage                                       ✔
       7.c. Populate the report summary view from the week it entered from       ✔
-    8. Bug fixes, report
-
+    8. Bug fixes, report                                                            due 09/06
+    9. Create a logger for all adding, grading, removing options so you can see what lindsay does
 
 
 

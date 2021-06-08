@@ -7,17 +7,23 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mailto/mailto.dart';
 import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
 import 'dart:io';
+
+import 'package:url_launcher/url_launcher.dart';
+
+
 
 
 
 void updateName(String unitID, String studentID, String studentName, int numberOfWeeks) async {
   CollectionReference unitCollection = FirebaseFirestore.instance.collection("units");
 
-  print("Update name called with $numberOfWeeks");
+  FirebaseFirestore.instance.collection("timelog").add({"Action":"Updated Student with name of: ${studentName}", "TimeDate": DateTime.now() });
+
 
   for (int i = 1; i <= numberOfWeeks; i++){
     var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
@@ -38,12 +44,14 @@ class StudentDetailView extends StatelessWidget {
 
   final String unitname;//unitReference
   final String unitID;
+  final String grade;
 
   String studentName;//filePath
   final String studentID;//studentReference
   final int numberOfWeeks;
+  
 
-  StudentDetailView({Key? key, required this.studentName, required this.studentID, required this.unitname, required this.unitID, required this.numberOfWeeks}) : super (key:key);
+  StudentDetailView({Key? key, required this.studentName, required this.studentID, required this.unitname, required this.unitID, required this.grade, required this.numberOfWeeks}) : super (key:key);
 
 
 
@@ -51,19 +59,19 @@ class StudentDetailView extends StatelessWidget {
   Widget build (BuildContext context){
 
 
-
     return FutureBuilder(
       future: _initialization,
       builder: (context, snapshot){
-        if (snapshot.hasError){
-          //something wrong
-        }
-        if (snapshot.connectionState == ConnectionState.done){
-          return ChangeNotifierProvider(
-              create: (context) => SingleStudent(),
-              child: StudentDetailViewSt(studentName: studentName, studentID: studentID, unitName: unitname, unitID: unitID, numberOfWeeks: numberOfWeeks),
-          );
-        }
+          if (snapshot.hasError){
+            //something wrong
+          }
+          if (snapshot.connectionState == ConnectionState.done){
+            return ChangeNotifierProvider(
+              create: (context) => SingleStudent(studentID: studentID, unitID: unitID),
+              child: StudentDetailViewSt(studentName: studentName, studentID: studentID, unitName: unitname, unitID: unitID, grade: grade, numberOfWeeks: numberOfWeeks),
+            );
+          }
+
         return MaterialApp(
             home:  Scaffold(
                 body: SafeArea(
@@ -71,10 +79,10 @@ class StudentDetailView extends StatelessWidget {
                         alignment: Alignment(0.5, 0.5),
                         child: Column(
                             mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Text(
-                                'Loading Application', style: TextStyle(fontSize: 40),
-                              ),
+                            children: [Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator()
+                              )
                             ]
                         )
                     )
@@ -90,19 +98,22 @@ class StudentDetailView extends StatelessWidget {
 
 class StudentDetailViewSt extends StatefulWidget {
   //const StudentDetailView({Key key}) : super(key: key);
-  StudentDetailViewSt({Key? key, required this.studentName, required this.studentID, required this.unitName, required this.unitID, required this.numberOfWeeks}) : super(key: key);
+  StudentDetailViewSt({Key? key, required this.studentName, required this.studentID, required this.unitName, required this.unitID, required this.grade, required this.numberOfWeeks}) : super(key: key);
 
   String studentName;
   final String studentID;
   final String unitName;
   final String unitID;
+  final String grade;
   final int numberOfWeeks;
 
 
 
   @override
-  _StudentDetailViewState createState() => _StudentDetailViewState(studentName: studentName, studentID: studentID);
+  _StudentDetailViewState createState() => _StudentDetailViewState(studentName: studentName, studentID: studentID, unitID: unitID);
 }
+
+
 
 
 
@@ -115,20 +126,29 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
 
   String studentName;
   final String studentID;
+  final String unitID;
   late Reference image;
   late Image imagePhoto;
+
+  late String lastGrade;
+
+  late final student = new SingleStudent(studentID: studentID, unitID: unitID);
+
+
   // Image image = Image.network("https://i.pinimg.com/474x/61/c7/80/61c780b045f999daacfd85e6f5ee96c8.jpg", height: 150, width: 150);
 
-  _StudentDetailViewState({Key? key, required this.studentName, required this.studentID});
+  _StudentDetailViewState({Key? key, required this.studentName, required this.studentID, required this.unitID});
+
+
 
   @override
   initState(){
     super.initState();
 
+    lastGrade = widget.grade;
+    student.setGradeAverageAndAttend();
 
-    //TODO CHANGE TO A FIREBASE CALL TO GET THE INSTANCE NAME from PICTURES
     image = FirebaseStorage.instance.ref(widget.studentName);
-    imagePhoto = Image.network("https://i.pinimg.com/474x/61/c7/80/61c780b045f999daacfd85e6f5ee96c8.jpg", height: 150, width: 150);
 
     studentFieldController = TextEditingController();
     studentFieldController.text = studentName;
@@ -142,6 +162,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -150,7 +171,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
         ),
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(studentName),//TODO change to variable
+        title: Text(studentName),
         centerTitle: true,
       ),
       key: scaffoldKey,
@@ -177,6 +198,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                       builder: (context, snapshot) {
                           if (snapshot.hasData == true){
                             imagePhoto = Image.network(snapshot.data.toString(), width: 150, height: 150);
+
                             return imagePhoto;
                           }
                           else if (snapshot.hasError){
@@ -192,7 +214,6 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            print('Take photo pressed ...'); //TODO
 
                             final cameras = await availableCameras();
                             final firstCam = cameras.first;
@@ -227,14 +248,16 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                         ),//TAKE PHOTO
                         ElevatedButton(
                           onPressed: () {
-                            print('Choose photo pressed ...'); //TODO
                             File _image;
 
                             final picker = ImagePicker();
                             bool _uploading = false;
 
                             void setImage(File file) async{
-                              //TODO UHH ADD REFERENCE / UPDATE REFERENCE IN FIREBASE
+
+
+                              FirebaseFirestore.instance.collection("timelog").add({"Action":"Updated Student Photo with name of: ${studentName}", "TimeDate": DateTime.now() });
+
                               await FirebaseStorage.instance.ref(widget.studentName).putFile(file).whenComplete((){
                                 print("File should be uploaded");
                                 setState(() {
@@ -273,7 +296,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                         ),//CHOOSE PHOTO
                         ElevatedButton(
                           onPressed: () {
-
+                            FirebaseFirestore.instance.collection("timelog").add({"Action":"Deleted student photo with name of: ${widget.studentName}", "TimeDate": DateTime.now() });
                             void deleteImage() async{
                               await FirebaseStorage.instance.ref(widget.studentName).delete().whenComplete((){
                                 setState(() {
@@ -356,7 +379,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                   Text(studentID,
                     style: TextStyle(
                       fontSize: fontSizeVar,
-                    ),),//TODO Change to variable
+                    ),),
                 ],
               ),//STUDENT ID ROW
               Row(
@@ -373,10 +396,10 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                     style: TextStyle(
                       fontSize: fontSizeVar,
                     ),),
-                  Text("XXXXXX TODO",
+                  Text("${student.gradeAverage} / 100",
                     style: TextStyle(
                       fontSize: fontSizeVar,
-                    ),),//TODO Change to variable
+                    ),),
                 ],
               ),//GRADE AVERAGE ROW
               Row(
@@ -393,10 +416,10 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                     style: TextStyle(
                       fontSize: fontSizeVar,
                     ),),
-                  Text("XXXXXX TODO",
+                  Text(student.attendancePercent,
                     style: TextStyle(
                       fontSize: fontSizeVar,
-                    ),),//TODO Change to variable
+                    ),),
                 ],
               ),//ATTENDANCE ROW
               Row(
@@ -413,10 +436,11 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                     style: TextStyle(
                       fontSize: fontSizeVar,
                     ),),
-                  Text("XXXXXX TODO",
+                  Text(lastGrade,
                     style: TextStyle(
                       fontSize: fontSizeVar,
-                    ),),//TODO Change to variable
+                    ),
+                  ),
                 ],
               ),//LAST GRADE ROW
               Row(
@@ -431,7 +455,43 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      print('Email summary pressed ...'); //TODO
+
+                      if (student.loading == false){
+                        launchMailto() async {
+                          final mailtoLink = Mailto(
+                            to: ["enterEmailHere@email.com"],
+                            cc: [""],
+                            subject: "Report generated for $studentName",
+                            body: student.emailSummary.join("\n"),
+                          );
+
+                          await launch('${mailtoLink}');
+                        }
+
+                        launchMailto();
+                      }
+                      else{
+                        showDialog(context: context, builder: (BuildContext context) {
+                          return AlertDialog(
+                            scrollable: false,
+                            content: Padding(
+                              padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children:
+                                  [
+                                    Text("Please wait for the generation of values to be completed"),
+                                  ],
+                              ),
+                            ),
+                          );
+                        },
+                        );
+                      }
+
+
+
+
                     },
                     child: const Text("Email summary"),
                     style: ElevatedButton.styleFrom(
@@ -445,6 +505,29 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                   ),//EMAIL SUMMARY BUTTON
                 ],
               ),//EMAIL SUMMARY
+              Row(mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        student.gradeAverage = student.information[0];
+                        student.attendancePercent = student.information[1];
+                      });
+                    },
+                    child: const Text("Update Fields"),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      onPrimary: Colors.white,
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: fontSizeVar,
+                      ),
+                    ),
+                  ),//EMAIL SUMMARY BUTTON
+                ],
+
+              )
 
 
             ],
@@ -525,6 +608,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
                             //TODO UHH ADD REFERENCE / UPDATE REFERENCE IN FIREBASE
                             await FirebaseStorage.instance.ref(widget.studentName).putFile(picture);
+                            FirebaseFirestore.instance.collection("timelog").add({"Action":"Took new Student Photo with name of: ${widget.studentName}", "TimeDate": DateTime.now() });
 
                             setState(() {
                               _uploading = false; //visual feedback of upload

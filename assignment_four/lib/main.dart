@@ -28,16 +28,16 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       5.c. Grade student                                                        ✔
       5.d. Change scheme functionality *NTH*                                    ✔
       5.e. Test that works *NTH*                                                ✔
-      5.f. Generate summary for unit *NTH*                                          nth (07/06) due 08/06
+      5.f. Generate summary for unit *NTH*                                      ✔
       5.g. Sort list of students                                                ✔
-      5.g. Search through students either by ID or Name   nth today (03/06)
+      5.g. Search through students either by ID or Name                         ✔
       5.h. Email week report                                                    ✔
     6. Student detail view
       6.a. Take new photo                                                       ✔            CHANGE TO THE FIREBASE REFERENCE SO WHEN NAME CHANGES SAME PIC IS USED
       6.b. Remove photo                                                         ✔
       6.c. Choose photo                                                         ✔
       6.d. Change name and save                                                 ✔
-      6.e. Generate student unit information summary                               nth (07/06) due 08/06
+      6.e. Generate student unit information summary                            ✔
     7. Week report view
       7.a. Generate grade average                                               ✔
       7.b. Generate attendance percentage                                       ✔

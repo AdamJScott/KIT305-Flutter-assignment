@@ -137,7 +137,7 @@ class _ClassViewSt extends State<ClassViewSt> {
 
   //Variables
   String dropDownValue = "UG";//TODO
-
+  bool searchedAlready = false;
 
 
 
@@ -176,6 +176,26 @@ class _ClassViewSt extends State<ClassViewSt> {
       ),
       title: Text(widget.unitname),
       centerTitle: true,
+      actions: <Widget>[
+        Padding(
+          padding: EdgeInsets.fromLTRB(0, 16.0, 16.0, 16.0),
+          child: GestureDetector(
+            onTap: () {
+              students.generateUnitReport(unitID, widget.numberOfWeeks, context);
+              },
+            child:
+              Row(
+                children: [
+                  Text("Unit Report "),
+                  Icon(
+                    Icons.email
+                  ),
+                ],
+              ),
+
+          )
+        )
+      ],
     ),
 
     key: scaffoldKey,
@@ -259,6 +279,16 @@ class _ClassViewSt extends State<ClassViewSt> {
                       alignment: Alignment(0, 0),
                       child: TextFormField(
                         controller: searchFieldController,
+                        onTap: (){
+                          if (searchedAlready){
+                            students.fetchWeek(weekNumber, unitID);
+                            searchedAlready = false;
+                          }
+                        },
+                        onFieldSubmitted: (value){
+                          students.filterByName(value);
+                          searchedAlready = true;
+                        },
                         obscureText: false,
                         decoration: const InputDecoration(
                           hintText: 'Search for a student via name',
@@ -928,14 +958,15 @@ class _ClassViewSt extends State<ClassViewSt> {
     List<String> grades = <String>[];
     grades.clear();
     int numberOfChkns = 0;
+    String newScheme = gradeScheme;
 
-    if (gradeScheme.length > 3){
+    if (newScheme.length > 3){
       //then it's chkn
       numberOfChkns = int.parse(gradeScheme.substring(3).toString());
-      gradeScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
+      newScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
     }
 
-    switch (gradeScheme){
+    switch (newScheme){
       case "hd":
         grades = <String>['HD', 'DN', 'CR', 'PP', 'NN', 'UG'];
         break;
@@ -959,10 +990,6 @@ class _ClassViewSt extends State<ClassViewSt> {
         break;
     }
 
-
-    if (students.listOfStudents.length != students.numberOfStudents){
-
-    }
 
     return ListView.builder(
         padding: EdgeInsets.all(8),
@@ -997,7 +1024,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 onLongPress: () {
                   Navigator.push(
                     context, MaterialPageRoute(builder: (context) {
-                      return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, numberOfWeeks: widget.numberOfWeeks);
+                      return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, grade: student.grade, numberOfWeeks: widget.numberOfWeeks);
                     })).then((value) {
                     students.fetchWeek(weekNumber, unitID);
                   });
@@ -1039,7 +1066,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 onLongPress: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) {
-                    return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, numberOfWeeks: widget.numberOfWeeks);
+                    return StudentDetailView(studentName: student.studentName, studentID: student.studentID, unitname: widget.unitname, unitID: widget.unitID, grade: student.grade, numberOfWeeks: widget.numberOfWeeks);
                   })).then((value) {
                     students.fetchWeek(weekNumber, unitID);
                   });

@@ -1,7 +1,13 @@
 import 'dart:developer';
+import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mailto/mailto.dart';
+import 'package:path/path.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+
 
 class Student {
   String studentName;
@@ -95,6 +101,13 @@ class StudentModel extends ChangeNotifier{
     });
   }
 
+  void filterByName(String name){
+
+    List<Student> studentList = listOfStudents.where((element) => element.studentName.toLowerCase().contains(name.toLowerCase())).toList();
+    print(studentList);
+    listOfStudents = studentList;
+    notifyListeners();
+  }
 
   void update(String unitID, int weeknumber, Student updateGrade, bool update) async{
     var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weeknumber).get();
@@ -109,6 +122,8 @@ class StudentModel extends ChangeNotifier{
   }
 
   void addStudent(String unitID, int weeknumber, int maxWeeks, Student newStudent) async{
+
+    FirebaseFirestore.instance.collection("timelog").add({"Action":"Added Student with name of: ${newStudent.studentName}", "TimeDate": DateTime.now() });
 
     loading = true;
     for (int i = weeknumber; i <= maxWeeks; i++){
@@ -125,6 +140,8 @@ class StudentModel extends ChangeNotifier{
   }
 
   void deleteStudent(String unitID, int weekNumber, int maxWeeks, Student deletedStudent) async{
+
+    FirebaseFirestore.instance.collection("timelog").add({"Action":"DeletedStudent with name of: ${deletedStudent.studentName}", "TimeDate": DateTime.now() });
 
     loading = true;
 
@@ -159,14 +176,299 @@ class StudentModel extends ChangeNotifier{
     notifyListeners();
   }
 
+  double gradeConverter(String gradeScheme, Student student){
 
+      /*
+          100 - 80 - 60 - 50 - 20 - 0
+          HD  - DN - CR - PP - NN - UG
+          A   - B  - C  - D  - F  - UG
+          Present                 - Absent
+          ChkN                    - Chk0
+          where n is the max
+
+
+
+     */
+
+    List<String> grades = [];
+    grades.clear();
+    int numberOfChkns = 0;
+    double gradeValue = 0;
+    String newScheme = gradeScheme;
+
+
+    if (gradeScheme.startsWith("chk")){
+      //then it's chkn
+      numberOfChkns = int.parse(gradeScheme.substring(3).toString());
+      newScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
+    }
+
+      switch (newScheme){
+      case "hd":
+        grades = <String>['UG', 'NN', 'PP', 'CR', 'DN', 'HD'];
+        break;
+      case "a":
+        grades = <String>['UG', 'F', 'D', 'C', 'B', 'A'];
+        break;
+      case "att":
+        grades = <String>['Absent', 'Present'];
+        break;
+      case "num":
+        //No need to do anything as it's already numeric
+        break;
+      case "chk":
+        grades = <String>[];
+        for (int i = 0; i < numberOfChkns + 1; i++){
+          grades.add("Check $i");
+        }
+        break;
+      default:
+        print("Something went wrong");
+        break;
+    }
+
+    if (gradeScheme != "num"){
+        int indexOfGrade = grades.indexOf(student.grade);
+        gradeValue = indexOfGrade * (100 / (grades.length -1 ));
+    }
+    else{
+      gradeValue = double.parse(student.grade);
+    }
+
+    return gradeValue;
+  }
+
+ void generateUnitReport(String unitID, int numberOfWeeks, BuildContext context) async{
+
+    List<double> gradesAccrued = new List.filled(numberOfWeeks, 0.0, growable: false);
+    List<int> numberOfStudentsPerWeek = new List.filled(numberOfWeeks, 0, growable: false);
+
+
+
+    showDialog(context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context)
+          {
+            return AlertDialog(
+                content: Padding(
+                    padding: const EdgeInsets.all(
+                        16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                      ],
+                    )
+                )
+
+            );
+          });
+
+
+    for (int i = 1; i <= numberOfWeeks; i++){
+
+      String unitName = "";
+
+      List<Student> students = [];
+
+      var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
+      querySnap.docs.forEach((week) async {
+
+        String gradeScheme = week.get("gradeScheme");
+        unitName = week.get("unitCode");
+
+        var studentSnap = await unitCollection.doc(unitID).collection("weeks").doc(week.id).collection("students").get();
+        studentSnap.docs.forEach((stuFound) {
+
+          var student = new Student(studentName: stuFound.get("studentName"), studentID: stuFound.get("studentID"), grade: stuFound.get("grade"));
+
+          gradesAccrued[i - 1] += gradeConverter(gradeScheme, student);
+          numberOfStudentsPerWeek[i -1] += 1;
+
+        });
+
+        List<String> weekReport = [];
+
+        weekReport.add("Unit Report for unit: ${unitName}");
+        weekReport.add("Week Number, Grade Average (numeric), Number of Students");
+
+        if (i == numberOfWeeks){
+          for (int i = 0; i < numberOfWeeks; i++){
+            gradesAccrued[i] = gradesAccrued[i] / numberOfStudentsPerWeek[i];
+
+            weekReport.add("Week ${i}, ${gradesAccrued[i]}, ${numberOfStudentsPerWeek[i]}");
+
+          }
+
+          Navigator.pop(context);
+
+          showDialog(context: context,
+              barrierDismissible: true,
+              builder: (BuildContext context)
+              {
+                return AlertDialog(
+                    content: Padding(
+                        padding: const EdgeInsets.all(
+                            16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                weekReport.join("\n"), textAlign: TextAlign.center,),
+                            ElevatedButton(onPressed: () {
+
+                              launchMailto() async {
+                                final mailtoLink = Mailto(
+                                  to: ["enterEmailHere@email.com"],
+                                  cc: [""],
+                                  subject: "${unitName} Report",
+                                  body: weekReport.join("\n"),
+                                );
+
+                                await launch('${mailtoLink}');
+                              }
+
+                              launchMailto();
+
+                            }, child: Text("Email Report")),
+                          ],
+                        )
+                    )
+
+                );
+              }
+          );
+        }
+      });
+    }
+  }
 }
 
 class SingleStudent extends ChangeNotifier{
 
 
   CollectionReference unitCollection = FirebaseFirestore.instance.collection("units");
+  String gradeAverage = "";
+  String attendancePercent = "";
+  bool loading = false;
 
+  List<String> information = ["Please wait", "For the calculations"];
+  List<String> emailSummary = [];
+
+
+
+  bool getLoading(){
+    return loading;
+  }
+
+
+  String studentID;
+  String unitID;
+
+  SingleStudent({required this.studentID, required this.unitID});
+
+
+  void setGradeAverageAndAttend() async{
+    notifyListeners();
+    loading = true;
+
+    double nowsii = 0.0;//numberOfWeeksStudentIsIn
+    double gradeTotal = 0.0;
+    int missedWeeks = 0;
+
+    var unitInfo = await FirebaseFirestore.instance.collection("units").doc(unitID).get();
+    int numberOfWeeks = int.parse(unitInfo.get("numberOfWeeks").toString());
+
+    for (int i = 1; i <= numberOfWeeks; i++){
+      var querySnap = await FirebaseFirestore.instance.collection("units").doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
+      querySnap.docs.forEach((week) async {
+        var studentSnap = await FirebaseFirestore.instance.collection("units").doc(unitID).collection("weeks").doc(week.id).collection("students").get();
+        studentSnap.docs.forEach((studentFound) {
+          var student = new Student(studentName: studentFound.get("studentName"), studentID: studentFound.get("studentID"), grade: studentFound.get("grade"));
+          student.doc_id = studentFound.id;
+
+          if (student.studentID == studentID){
+            gradeTotal += gradeConverter(week.get("gradeScheme"), student);
+            nowsii += 1.0;
+
+            if (emailSummary.isEmpty){
+              emailSummary.add("Summary report for ${student.studentName}\nWeek number, Grade Received, Grade Numeric Value");
+            }
+
+
+            emailSummary.add("Week $i, ${student.grade}, ${gradeConverter(week.get("gradeScheme"), student)}");
+
+            if (gradeConverter(week.get("gradeScheme"), student) == 0.0){
+              missedWeeks += 1;
+            }
+          }
+        });
+
+        if (i == numberOfWeeks){
+          gradeAverage = (gradeTotal / nowsii).toStringAsFixed(2);
+          information[0] = gradeAverage;
+
+          attendancePercent = ((nowsii - missedWeeks / nowsii)).toStringAsFixed(2);
+          information[1] = attendancePercent;
+
+          print("Information Completed");
+          loading = false;
+          print(loading);
+          notifyListeners();
+        }
+      });
+    }
+  }
+
+  double gradeConverter(String gradeScheme, Student student){
+
+    List<String> grades = [];
+    grades.clear();
+    int numberOfChkns = 0;
+    double gradeValue = 0;
+    String newScheme = gradeScheme;
+
+
+    if (gradeScheme.startsWith("chk")){
+      //then it's chkn
+      numberOfChkns = int.parse(gradeScheme.substring(3).toString());
+      newScheme = "${gradeScheme[0]}${gradeScheme[1]}${gradeScheme[2]}";
+    }
+
+    switch (newScheme){
+      case "hd":
+        grades = <String>['UG', 'NN', 'PP', 'CR', 'DN', 'HD'];
+        break;
+      case "a":
+        grades = <String>['UG', 'F', 'D', 'C', 'B', 'A'];
+        break;
+      case "att":
+        grades = <String>['Absent', 'Present'];
+        break;
+      case "num":
+      //No need to do anything as it's already numeric
+        break;
+      case "chk":
+        grades = <String>[];
+        for (int i = 0; i < numberOfChkns + 1; i++){
+          grades.add("Check $i");
+        }
+        break;
+      default:
+        print("Something went wrong");
+        break;
+    }
+
+    if (gradeScheme != "num"){
+      int indexOfGrade = grades.indexOf(student.grade);
+      gradeValue = indexOfGrade * (100 / (grades.length -1 ));
+    }
+    else{
+      gradeValue = double.parse(student.grade);
+    }
+
+    return gradeValue;
+  }
 
 
 }

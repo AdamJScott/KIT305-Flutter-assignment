@@ -33,7 +33,7 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       5.g. Search through students either by ID or Name                         ✔
       5.h. Email week report                                                    ✔
     6. Student detail view
-      6.a. Take new photo                                                       ✔            CHANGE TO THE FIREBASE REFERENCE SO WHEN NAME CHANGES SAME PIC IS USED
+      6.a. Take new photo                                                       ✔
       6.b. Remove photo                                                         ✔
       6.c. Choose photo                                                         ✔
       6.d. Change name and save                                                 ✔
@@ -43,6 +43,8 @@ TODO WITH THE PHOTOS, MAKE SURE YOU CHANGE IT TO THE FIREBASE INTERACTION RATHER
       7.b. Generate attendance percentage                                       ✔
       7.c. Populate the report summary view from the week it entered from       ✔
     8. Bug fixes, report                                                            due 09/06
+
+
 
 
     9. Create a logger for all adding, grading, removing options so you can see what lindsay does

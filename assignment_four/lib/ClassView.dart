@@ -346,7 +346,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                       width: 150,
                       height: 40,
                       margin: const EdgeInsets.only(top: 4, bottom: 4),
-                      child: BuildAddButton(context, students)),//ADD STUDENT
+                      child: BuildAddButton(context, students, students.markingScheme)),//ADD STUDENT
                   Container(
                     width: 150,
                     height: 40,
@@ -837,7 +837,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                 );
   }
 
-  ElevatedButton BuildAddButton(BuildContext context, StudentModel students) {
+  ElevatedButton BuildAddButton(BuildContext context, StudentModel students, String gradeScheme) {
     return ElevatedButton(
                   onPressed: () {
 
@@ -905,9 +905,13 @@ class _ClassViewSt extends State<ClassViewSt> {
                                   //Check if the student exists, if not, make an empty one
                                   Student idExists = students.listOfStudents.firstWhere((studentIDNumber) => studentIDNumber.studentID == IDController.text, orElse: () => new Student(studentName: "", studentID: "", grade: ""));
 
+
+
+
                                   if (NameController.text.isNotEmpty &&
                                       IDController.text.isNotEmpty &&
                                       idIsNumber && !idExists.studentID.isNotEmpty) {
+
                                     Student newStu = new Student(
                                         studentName: NameController.text,
                                         studentID: IDController.text,
@@ -928,7 +932,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
                                                       Text(
-                                                          "Please enter in a valid name or ID"),
+                                                          "Please enter in a valid name or ID, as the ID may already be taken"),
                                                     ],
                                                   )
                                               )

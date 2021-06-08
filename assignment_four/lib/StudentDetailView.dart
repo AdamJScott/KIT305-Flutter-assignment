@@ -148,7 +148,9 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
     lastGrade = widget.grade;
     student.setGradeAverageAndAttend();
 
-    image = FirebaseStorage.instance.ref(widget.studentName);
+
+
+    image = FirebaseStorage.instance.ref("$studentID.png");
 
     studentFieldController = TextEditingController();
     studentFieldController.text = studentName;
@@ -171,370 +173,372 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
         ),
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(studentName),
+        title: Text("Student Details"),
         centerTitle: true,
       ),
       key: scaffoldKey,
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment(0,0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:10),
-                ],
-              ),//SPACER
-              Align(
-                alignment: Alignment(0,0),
-                child: Row(
+      body:
+      SafeArea(
+
+          child: Align(
+            alignment: Alignment(0,0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Row(
                   mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    FutureBuilder(
-                      future: image.getDownloadURL(),
-                      builder: (context, snapshot) {
-                          if (snapshot.hasData == true){
-                            imagePhoto = Image.network(snapshot.data.toString(), width: 150, height: 150);
+                    SizedBox(height:10),
+                  ],
+                ),//SPACER
+                Align(
+                  alignment: Alignment(0,0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FutureBuilder(
+                        future: image.getDownloadURL(),
+                        builder: (context, snapshot) {
+                            if (snapshot.hasData == true){
+                              imagePhoto = Image.network(snapshot.data.toString(), width: 150, height: 150);
 
-                            return imagePhoto;
-                          }
-                          else if (snapshot.hasError){
-                            return Icon(Icons.add_a_photo, size: 150);
-                          }
-                          else{
-                            return Center(child: CircularProgressIndicator());
-                          }
-                      },
-                    ),
-
-                    Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-
-                            final cameras = await availableCameras();
-                            final firstCam = cameras.first;
-
-                            try {
-                              var picture = await Navigator.push(context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TakePictureScreen(
-                                              camera: firstCam, studentName: studentName
-                                          )
-                                  )
-                              );
-
-                              setState(() {
-                                reassemble();
-                              });
-
-                            } catch (e){
-                              print(e);
+                              return imagePhoto;
                             }
-                          },
-                          child: const Text("Take photo"),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.green,
-                            onPrimary: Colors.white,
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: fontSizeVar,
-                            ),
-                          ),
-                        ),//TAKE PHOTO
-                        ElevatedButton(
-                          onPressed: () {
-                            File _image;
-
-                            final picker = ImagePicker();
-                            bool _uploading = false;
-
-                            void setImage(File file) async{
-
-
-                              FirebaseFirestore.instance.collection("timelog").add({"Action":"Updated Student Photo with name of: ${studentName}", "TimeDate": DateTime.now() });
-
-                              await FirebaseStorage.instance.ref(widget.studentName).putFile(file).whenComplete((){
-                                print("File should be uploaded");
-                                setState(() {
-                                  imagePhoto = Image.file(file);
-                                });
-                              });
+                            else if (snapshot.hasError){
+                              return Icon(Icons.add_a_photo, size: 150);
                             }
-
-                            Future getImage() async{
-                              final pickedFile = await picker.getImage(source: ImageSource.gallery);
-                              setState((){
-                                if (pickedFile != null){
-                                  setImage(File(pickedFile.path));
-                                }
-                                else{
-                                  print("Nothing selected");
-                                }
-                              });
+                            else{
+                              return Center(child: CircularProgressIndicator());
                             }
+                        },
+                      ),
 
-                            setState(() {
-                              getImage();
-                            });
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
 
+                              final cameras = await availableCameras();
+                              final firstCam = cameras.first;
 
-                          },
-                          child: const Text("Choose photo"),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.blue,
-                            onPrimary: Colors.white,
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: fontSizeVar,
-                            ),
-                          ),
-                        ),//CHOOSE PHOTO
-                        ElevatedButton(
-                          onPressed: () {
-                            FirebaseFirestore.instance.collection("timelog").add({"Action":"Deleted student photo with name of: ${widget.studentName}", "TimeDate": DateTime.now() });
-                            void deleteImage() async{
-                              await FirebaseStorage.instance.ref(widget.studentName).delete().whenComplete((){
+                              try {
+                                var picture = await Navigator.push(context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            TakePictureScreen(
+                                                camera: firstCam, studentName: studentName, studentID: studentID
+                                            )
+                                    )
+                                );
+
                                 setState(() {
                                   reassemble();
                                 });
-                              });
-                            }
 
-                            deleteImage();
-
-                          },
-                          child: const Text("Remove photo"),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.red,
-                            onPrimary: Colors.white,
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: fontSizeVar,
-                            ),
-                          ),
-                        ),//REMOVE PHOTO
-                      ],
-                    ),
-                  ],
-                )
-              ),//IMAGE AND BUTTONS
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:16),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 250,
-                      padding: EdgeInsets.fromLTRB(32,16,32,16),
-                      child: TextField(
-                        onSubmitted: (value) {
-                          if (value.isNotEmpty){
-                            updateName(widget.unitID, studentID, value, widget.numberOfWeeks);
-                          }
-                        },
-                        controller: studentFieldController,
-                        obscureText: false,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: fontSizeVar,
-                        ),
-                        decoration: const InputDecoration(
-
-                          border: OutlineInputBorder(),
-                          labelText: 'Change student name',
-                          hintText: "Enter in student's new name",
-                          ),
-                       ),
-                    ),
-                  )
-                ],
-              ),//STUDENT NAME ROW
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:8),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                      "Student ID: ",
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),
-                  ),
-                  Text(studentID,
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                ],
-              ),//STUDENT ID ROW
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:16),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text("Grade average: ",
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                  Text("${student.gradeAverage} / 100",
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                ],
-              ),//GRADE AVERAGE ROW
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:16),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text("Attendance %: ",
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                  Text(student.attendancePercent,
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                ],
-              ),//ATTENDANCE ROW
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:16),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text("Last grade: ",
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),),
-                  Text(lastGrade,
-                    style: TextStyle(
-                      fontSize: fontSizeVar,
-                    ),
-                  ),
-                ],
-              ),//LAST GRADE ROW
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(height:16),
-                ],
-              ),//SPACER
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-
-                      if (student.loading == false){
-                        launchMailto() async {
-                          final mailtoLink = Mailto(
-                            to: ["enterEmailHere@email.com"],
-                            cc: [""],
-                            subject: "Report generated for $studentName",
-                            body: student.emailSummary.join("\n"),
-                          );
-
-                          await launch('${mailtoLink}');
-                        }
-
-                        launchMailto();
-                      }
-                      else{
-                        showDialog(context: context, builder: (BuildContext context) {
-                          return AlertDialog(
-                            scrollable: false,
-                            content: Padding(
-                              padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children:
-                                  [
-                                    Text("Please wait for the generation of values to be completed"),
-                                  ],
+                              } catch (e){
+                                print(e);
+                              }
+                            },
+                            child: const Text("Take photo"),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.green,
+                              onPrimary: Colors.white,
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: fontSizeVar,
                               ),
                             ),
+                          ),//TAKE PHOTO
+                          ElevatedButton(
+                            onPressed: () {
+                              File _image;
+
+                              final picker = ImagePicker();
+                              bool _uploading = false;
+
+                              void setImage(File file) async{
+
+                                FirebaseFirestore.instance.collection("timelog").add({"Action":"Updated Student Photo with name of: ${studentName}", "TimeDate": DateTime.now() });
+
+                                await FirebaseStorage.instance.ref("${widget.studentID}.png").putFile(file).whenComplete((){
+                                  print("File should be uploaded");
+                                  setState(() {
+                                    imagePhoto = Image.file(file);
+                                  });
+                                });
+                              }
+
+                              Future getImage() async{
+                                final pickedFile = await picker.getImage(source: ImageSource.gallery);
+                                setState((){
+                                  if (pickedFile != null){
+                                    setImage(File(pickedFile.path));
+                                  }
+                                  else{
+                                    print("Nothing selected");
+                                  }
+                                });
+                              }
+
+                              setState(() {
+                                getImage();
+                              });
+
+
+                            },
+                            child: const Text("Choose photo"),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.blue,
+                              onPrimary: Colors.white,
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: fontSizeVar,
+                              ),
+                            ),
+                          ),//CHOOSE PHOTO
+                          ElevatedButton(
+                            onPressed: () {
+                              FirebaseFirestore.instance.collection("timelog").add({"Action":"Deleted student photo with name of: ${widget.studentName}", "TimeDate": DateTime.now() });
+                              void deleteImage() async{
+                                await FirebaseStorage.instance.ref("${widget.studentID}.png").delete().whenComplete((){
+                                  setState(() {
+                                    reassemble();
+                                  });
+                                });
+                              }
+
+                              deleteImage();
+
+                            },
+                            child: const Text("Remove photo"),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.red,
+                              onPrimary: Colors.white,
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: fontSizeVar,
+                              ),
+                            ),
+                          ),//REMOVE PHOTO
+                        ],
+                      ),
+                    ],
+                  )
+                ),//IMAGE AND BUTTONS
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:16),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: 250,
+                        padding: EdgeInsets.fromLTRB(32,16,32,16),
+                        child: TextField(
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty){
+                              updateName(widget.unitID, studentID, value, widget.numberOfWeeks);
+                              reassemble();
+                            }
+                          },
+                          controller: studentFieldController,
+                          obscureText: false,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: fontSizeVar,
+                          ),
+                          decoration: const InputDecoration(
+
+                            border: OutlineInputBorder(),
+                            labelText: 'Change student name',
+                            hintText: "Enter in student's new name",
+                            ),
+                         ),
+                      ),
+                    )
+                  ],
+                ),//STUDENT NAME ROW
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:8),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                        "Student ID: ",
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),
+                    ),
+                    Text(studentID,
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                  ],
+                ),//STUDENT ID ROW
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:16),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Grade average: ",
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                    Text("${student.gradeAverage} / 100",
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                  ],
+                ),//GRADE AVERAGE ROW
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:16),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Attendance %: ",
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                    Text(student.attendancePercent,
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                  ],
+                ),//ATTENDANCE ROW
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:16),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Last grade: ",
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),),
+                    Text(lastGrade,
+                      style: TextStyle(
+                        fontSize: fontSizeVar,
+                      ),
+                    ),
+                  ],
+                ),//LAST GRADE ROW
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height:16),
+                  ],
+                ),//SPACER
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+
+                        if (student.loading == false){
+                          launchMailto() async {
+                            final mailtoLink = Mailto(
+                              to: ["enterEmailHere@email.com"],
+                              cc: [""],
+                              subject: "Report generated for $studentName",
+                              body: student.emailSummary.join("\n"),
+                            );
+
+                            await launch('${mailtoLink}');
+                          }
+
+                          launchMailto();
+                        }
+                        else{
+                          showDialog(context: context, builder: (BuildContext context) {
+                            return AlertDialog(
+                              scrollable: false,
+                              content: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children:
+                                    [
+                                      Text("Please wait for the generation of values to be completed"),
+                                    ],
+                                ),
+                              ),
+                            );
+                          },
                           );
-                        },
-                        );
-                      }
+                        }
 
 
 
 
-                    },
-                    child: const Text("Email summary"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: fontSizeVar,
+                      },
+                      child: const Text("Email summary"),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        onPrimary: Colors.white,
+                        textStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: fontSizeVar,
+                        ),
                       ),
-                    ),
-                  ),//EMAIL SUMMARY BUTTON
-                ],
-              ),//EMAIL SUMMARY
-              Row(mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        student.gradeAverage = student.information[0];
-                        student.attendancePercent = student.information[1];
-                      });
-                    },
-                    child: const Text("Update Fields"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: fontSizeVar,
+                    ),//EMAIL SUMMARY BUTTON
+                  ],
+                ),//EMAIL SUMMARY
+                Row(mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          student.gradeAverage = student.information[0];
+                          student.attendancePercent = student.information[1];
+                        });
+                      },
+                      child: const Text("Update Fields"),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        onPrimary: Colors.white,
+                        textStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: fontSizeVar,
+                        ),
                       ),
-                    ),
-                  ),//EMAIL SUMMARY BUTTON
-                ],
+                    ),//EMAIL SUMMARY BUTTON
+                  ],
 
-              )
+                )
 
 
-            ],
-          )
+              ],
+            )
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -543,8 +547,9 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
 class TakePictureScreen extends StatefulWidget{
   final CameraDescription camera;
   final String studentName;
+  final String studentID;
 
-  const TakePictureScreen({Key? key, required this.camera, required this.studentName}) : super (key: key);
+  const TakePictureScreen({Key? key, required this.camera, required this.studentName, required this.studentID}) : super (key: key);
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
@@ -599,6 +604,15 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                           try {
                             await _initializeControllerFuture;
 
+                            void deleteImage() async{
+                              await FirebaseStorage.instance.ref("${widget.studentID}.png").delete().whenComplete((){
+                                setState(() {
+                                  reassemble();
+                                });
+                              });
+                            }
+                            deleteImage();
+
                             final image = await _controller.takePicture();
                             final picture = File(image.path);
 
@@ -606,8 +620,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               _uploading = true; //visual feedback of upload
                             });
 
-                            //TODO UHH ADD REFERENCE / UPDATE REFERENCE IN FIREBASE
-                            await FirebaseStorage.instance.ref(widget.studentName).putFile(picture);
+
+                            await FirebaseStorage.instance.ref("${widget.studentID}.png").putFile(picture);
+
                             FirebaseFirestore.instance.collection("timelog").add({"Action":"Took new Student Photo with name of: ${widget.studentName}", "TimeDate": DateTime.now() });
 
                             setState(() {

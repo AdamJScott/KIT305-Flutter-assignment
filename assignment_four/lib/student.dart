@@ -125,10 +125,38 @@ class StudentModel extends ChangeNotifier{
 
     FirebaseFirestore.instance.collection("timelog").add({"Action":"Added Student with name of: ${newStudent.studentName}", "TimeDate": DateTime.now() });
 
+
+
     loading = true;
     for (int i = weeknumber; i <= maxWeeks; i++){
+
+
+
       var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
       querySnap.docs.forEach((doc) async {
+
+        String gradeScheme = doc.get("gradeScheme").toString();
+
+        String grade = "UG";
+
+        switch(gradeScheme){
+          case "hd":
+            break;
+          case "a":
+            break;
+          case "num":
+            grade = "0";
+            break;
+          case "att":
+            grade = "Absent";
+            break;
+          default:
+            grade = "Check 0";
+            break;
+        }
+
+        newStudent.grade = grade;
+
         var studentCollection = unitCollection.doc(unitID).collection("weeks").doc(doc.id).collection("students");
         await studentCollection.add(newStudent.toJson());
       });
@@ -165,7 +193,9 @@ class StudentModel extends ChangeNotifier{
   void updateWeekGradeScheme(String unitID, int weekNumber, String newScheme) async{
     loading = true;
     notifyListeners();
-    
+
+    FirebaseFirestore.instance.collection("timelog").add({"Action":"Updating week no $weekNumber in unit $unitID with: $newScheme", "TimeDate": DateTime.now() });
+
     var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: weekNumber).get();
     querySnap.docs.forEach((weekToUpdate) async{ 
       await unitCollection.doc(unitID).collection("weeks").doc(weekToUpdate.id).update({"gradeScheme": newScheme});
@@ -357,6 +387,7 @@ class SingleStudent extends ChangeNotifier{
 
 
 
+
   bool getLoading(){
     return loading;
   }
@@ -365,7 +396,9 @@ class SingleStudent extends ChangeNotifier{
   String studentID;
   String unitID;
 
+
   SingleStudent({required this.studentID, required this.unitID});
+
 
 
   void setGradeAverageAndAttend() async{

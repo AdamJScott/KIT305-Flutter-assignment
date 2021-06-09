@@ -118,7 +118,6 @@ class StudentDetailViewSt extends StatefulWidget {
 
 class _StudentDetailViewState extends State<StudentDetailViewSt>{
   late TextEditingController studentFieldController;
-  late Future<List<String>> filesFuture;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   double fontSizeVar = 25;
@@ -134,7 +133,6 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
   late final student = new SingleStudent(studentID: studentID, unitID: unitID);
 
 
-  // Image image = Image.network("https://i.pinimg.com/474x/61/c7/80/61c780b045f999daacfd85e6f5ee96c8.jpg", height: 150, width: 150);
 
   _StudentDetailViewState({Key? key, required this.studentName, required this.studentID, required this.unitID});
 
@@ -146,8 +144,6 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
 
     lastGrade = widget.grade;
     student.setGradeAverageAndAttend();
-
-
 
     image = FirebaseStorage.instance.ref("$studentID.png");
 
@@ -201,6 +197,7 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                         builder: (context, snapshot) {
                             if (snapshot.hasData == true){
                               imagePhoto = Image.network(snapshot.data.toString(), width: 150, height: 150);
+
 
                               return imagePhoto;
                             }

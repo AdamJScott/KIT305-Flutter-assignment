@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:assignment_four/student.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -252,10 +251,8 @@ class _StudentDetailViewState extends State<StudentDetailViewSt>{
                           ),//TAKE PHOTO
                           ElevatedButton(
                             onPressed: () {
-                              File _image;
 
                               final picker = ImagePicker();
-                              bool _uploading = false;
 
                               void setImage(File file) async{
 

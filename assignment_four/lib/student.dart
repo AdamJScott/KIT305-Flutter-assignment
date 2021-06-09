@@ -1,10 +1,7 @@
-import 'dart:developer';
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mailto/mailto.dart';
-import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
@@ -298,8 +295,6 @@ class StudentModel extends ChangeNotifier{
     for (int i = 1; i <= numberOfWeeks; i++){
 
       String unitName = "";
-
-      List<Student> students = [];
 
       var querySnap = await unitCollection.doc(unitID).collection("weeks").where("weekNumber", isEqualTo: i).get();
       querySnap.docs.forEach((week) async {

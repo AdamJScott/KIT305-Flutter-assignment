@@ -1,6 +1,3 @@
-import 'dart:collection';
-import 'dart:developer';
-import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,19 +8,16 @@ import 'package:assignment_four/StudentDetailView.dart';
 import 'package:assignment_four/WeekReportView.dart';
 import 'package:assignment_four/student.dart';
 import 'package:url_launcher/url_launcher.dart';
-//TODO https://rsainik80.medium.com/dropdown-button-inside-listview-builder-in-flutter-e2eb74fb45b4
 
 //Helper functions
+//Taken from https://coflutter.com/dart-flutter-how-to-check-if-a-string-is-a-number/ uploaded by Phuc Tran on the 6th of November 2020.
+// ignore: non_constant_identifier_names
 bool isNumericUsing_tryParse(String string) {
   // Null or empty string is not a number
   if (string == null || string.isEmpty) {
     return false;
   }
 
-  // Try to parse input string to number.
-  // Both integer and double work.
-  // Use int.tryParse if you want to check integer only.
-  // Use double.tryParse if you want to check double only.
   final number = num.tryParse(string);
 
   if (number == null) {
@@ -895,7 +889,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                               ),
                                 child: Text("Create new student"),
                                 onPressed: () {
-                                  //https://coflutter.com/dart-flutter-how-to-check-if-a-string-is-a-number/
+
 
 
                                   //Check if ID number is a number

@@ -441,7 +441,7 @@ class SingleStudent extends ChangeNotifier{
           gradeAverage = (gradeTotal / nowsii).toStringAsFixed(2);
           information[0] = gradeAverage;
 
-          attendancePercent = ((nowsii - missedWeeks / nowsii)).toStringAsFixed(2);
+          attendancePercent = (((nowsii - missedWeeks) / nowsii) * 100).toStringAsFixed(0);
           information[1] = attendancePercent;
 
           print("Information Completed");

@@ -1076,15 +1076,44 @@ class _ClassViewSt extends State<ClassViewSt> {
                     onSubmitted: (value) {
                       int gradeToSubmit;
 
-                      if (int.parse(value) > 100){
-                        gradeToSubmit = 100;
+
+                      if (isNumericUsing_tryParse(value)){
+                        if (int.parse(value) > 100){
+                          gradeToSubmit = 100;
+                        }
+                        else{
+                          gradeToSubmit = int.parse(value);
+                        }
+
+                        student.grade = gradeToSubmit.toString();
+                        students.update(unitID, weekNumber, student, false);
                       }
-                      else{
-                        gradeToSubmit = int.parse(value);
+                      else {
+                        showDialog(context: context,
+                            barrierDismissible: true,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  content: Padding(
+                                      padding: const EdgeInsets.all(
+                                          16.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                              "Please enter a number between 0 and 100."),
+                                        ],
+                                      )
+                                  )
+                              );
+                            });
+
+                        controlBoi.text = student.grade.toString();
                       }
-                      student.grade = gradeToSubmit.toString();
-                      students.update(unitID, weekNumber, student, true);
                     },
+                    onTap: () {
+                      controlBoi.text = "";
+                    },
+
                   ),
                 ),
               ),

@@ -274,6 +274,8 @@ class _ClassViewSt extends State<ClassViewSt> {
                       child: TextFormField(
                         controller: searchFieldController,
                         onTap: (){
+                          searchFieldController.text = "";
+
                           if (searchedAlready){
                             students.fetchWeek(weekNumber, unitID);
                             searchedAlready = false;
@@ -890,17 +892,12 @@ class _ClassViewSt extends State<ClassViewSt> {
                                 child: Text("Create new student"),
                                 onPressed: () {
 
-
-
                                   //Check if ID number is a number
                                   bool idIsNumber = isNumericUsing_tryParse(
                                       IDController.text);
 
                                   //Check if the student exists, if not, make an empty one
                                   Student idExists = students.listOfStudents.firstWhere((studentIDNumber) => studentIDNumber.studentID == IDController.text, orElse: () => new Student(studentName: "", studentID: "", grade: ""));
-
-
-
 
                                   if (NameController.text.isNotEmpty &&
                                       IDController.text.isNotEmpty &&
@@ -926,7 +923,7 @@ class _ClassViewSt extends State<ClassViewSt> {
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
                                                       Text(
-                                                          "Please enter in a valid name or ID, as the ID may already be taken"),
+                                                          "Please enter in a valid name or ID, as the ID may already be taken or the ID is not a number"),
                                                     ],
                                                   )
                                               )

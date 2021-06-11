@@ -177,11 +177,15 @@ class StudentModel extends ChangeNotifier{
           //Get each week's student information
         var studentSnap = await unitCollection.doc(unitID).collection("weeks").doc(weekDoc.id).collection("students").where("studentID", isEqualTo: deletedStudent.studentID).get();
         studentSnap.docs.forEach((studentToDelete) async{
-          await unitCollection.doc(unitID).collection("weeks").doc(weekDoc.id).collection("students").doc(studentToDelete.id).delete();
+          unitCollection.doc(unitID).collection("weeks").doc(weekDoc.id).collection("students").doc(studentToDelete.id).delete();
         });
       });
 
       if (i == weekNumber){
+        listOfStudents.clear();
+        loading = true;
+        notifyListeners();
+
         fetchWeek(weekNumber, unitID);
       }
     }
@@ -321,7 +325,7 @@ class StudentModel extends ChangeNotifier{
           for (int i = 0; i < numberOfWeeks; i++){
             gradesAccrued[i] = gradesAccrued[i] / numberOfStudentsPerWeek[i];
 
-            weekReport.add("Week ${i}, ${gradesAccrued[i]}, ${numberOfStudentsPerWeek[i]}");
+            weekReport.add("Week ${i}, ${gradesAccrued[i].toStringAsFixed(2)}, ${numberOfStudentsPerWeek[i]}");
 
           }
 
